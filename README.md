@@ -84,7 +84,7 @@ Four defaults ship with the plugin and can all be deleted; they are not recreate
 
 | Plugin | Verified DeepSeek Harness |
 | --- | --- |
-| `0.1.0` | `0.1.2-rc.1` |
+| `0.1.0`–`0.1.1` | `0.1.2-rc.1` |
 
 Verify newer DSH releases yourself. If incompatible, disable or uninstall the plugin — do not patch DSH core.
 
