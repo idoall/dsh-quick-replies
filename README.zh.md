@@ -24,6 +24,10 @@
 
 回复库保存在 DSH Host 全局设置命名空间 `quick-replies`，同一 Host 下多浏览器/设备共享。折叠偏好按当前浏览器分别记住。
 
+<p align="center">
+  <img src="./assets/ui.png" width="100%" alt="DeepSeek Harness 输入区上方的快捷回复栏：继续等 chip、添加与管理按钮，以及消息输入框">
+</p>
+
 ## 能做什么
 
 - **一点即发**：把常用短句（如「继续」「已重启请继续」）存成 chip，点击直接发送。

@@ -24,6 +24,10 @@ A row of stored text chips sits above the input. A tap sends them as an ordinary
 
 The reply library lives in the DSH Host global settings namespace `quick-replies`, shared across browsers and devices on the same Host. Fold preferences are remembered per browser.
 
+<p align="center">
+  <img src="./assets/ui.png" width="100%" alt="DeepSeek Harness composer with the Quick Replies bar: chips such as continue, plus and manage buttons, and the message input">
+</p>
+
 ## What it does
 
 - **One tap to send**: store short phrases (for example “continue”) as chips and send them as plain text.
