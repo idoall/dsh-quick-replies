@@ -1,6 +1,6 @@
 {
   "name": "dsh-quick-replies",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH web plugin: manageable quick-reply text chips in the current session input area; one tap sends the stored text as an ordinary user message (queue while idle, steer when the top-level session runs). Independent source, user data and DSH install stay separate for easy upgrade recovery.",
   "type": "module",
   "main": "lib/index.js",

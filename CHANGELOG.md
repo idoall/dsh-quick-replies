@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- CI 只跑 Node 24，避免 jsdom/undici 在 Node 20 上失败。
+- npm 发布改用 GitHub Actions OIDC Trusted Publisher，推 `v*` 标签即可发版。
+
 ## 0.1.0
 
 - 在会话输入区提供可管理的快捷回复，点击即发送纯文本用户消息。

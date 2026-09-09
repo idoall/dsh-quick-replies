@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, Dev]
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: [20.x, 24.x]
+        node: [24.x]
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
