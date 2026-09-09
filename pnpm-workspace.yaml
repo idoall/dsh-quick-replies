@@ -1,0 +1,15 @@
+# The project is its own pnpm workspace root, so pnpm never walks up into a
+# parent workspace when installing.
+packages:
+  - .
+
+# esbuild only needs its binary bootstrap; everything else in this tree is
+# pure JavaScript.
+allowBuilds:
+  esbuild: true
+
+# The harness 0.1.2-rc.1 line ships as release candidates; keep pnpm's
+# release-age guard from refusing our pinned rc devDependencies.
+minimumReleaseAgeExclude:
+  - '@deepseek-ai/dsh-settings@0.1.2-rc.1'
+  - '@deepseek-ai/schemastery@3.18.2'
