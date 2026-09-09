@@ -42,12 +42,12 @@ jobs:
       - name: Pack plugin
         run: |
           pnpm pack
-          sha256sum dsh-quick-replies-*.tgz > dsh-quick-replies-plugin.sha256
+          sha256sum *dsh-quick-replies-*.tgz > dsh-quick-replies-plugin.sha256
       - uses: actions/upload-artifact@v7
         with:
           name: plugin-package
           path: |
-            dsh-quick-replies-*.tgz
+            *dsh-quick-replies-*.tgz
             dsh-quick-replies-plugin.sha256
           if-no-files-found: error
 
@@ -70,7 +70,7 @@ jobs:
           path: release-assets
       - name: Publish npm package
         run: |
-          package="$(find "$GITHUB_WORKSPACE/release-assets" -maxdepth 1 -type f -name 'dsh-quick-replies-*.tgz' -print -quit)"
+          package="$(find "$GITHUB_WORKSPACE/release-assets" -maxdepth 1 -type f -name '*dsh-quick-replies-*.tgz' -print -quit)"
           test -n "$package"
           version="${GITHUB_REF_NAME#v}"
           published="$(npm view "dsh-quick-replies@$version" version 2>/dev/null || true)"
