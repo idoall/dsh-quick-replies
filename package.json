@@ -1,6 +1,6 @@
 {
   "name": "dsh-quick-replies",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "DSH web plugin: manageable quick-reply text chips in the current session input area; one tap sends the stored text as an ordinary user message (queue while idle, steer when the top-level session runs). Independent source, user data and DSH install stay separate for easy upgrade recovery.",
   "type": "module",
   "main": "lib/index.js",
@@ -57,13 +57,12 @@
         "@deepseek-ai/dsh-api-session-controller",
         "@deepseek-ai/dsh-client-connection",
         "@deepseek-ai/dsh-client-ui-conversation",
-        "@deepseek-ai/dsh-client-ui-settings",
-        "@deepseek-ai/dsh-client-ui-slots"
+        "@deepseek-ai/dsh-client-ui-settings"
       ]
     },
     "compatibility": {
       "dshReleases": {
-        "0.1.2-rc.1": "compatible"
+        "0.1.5-rc.1": "compatible"
       }
     }
   },
@@ -81,11 +80,11 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-settings": "0.1.2-rc.1"
+    "@deepseek-ai/dsh-settings": ">=0.1.5-rc.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-settings": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-settings": "0.1.5-rc.1",
     "@deepseek-ai/schemastery": "^3.18.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",

@@ -8,12 +8,13 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 
 // Modules the web shell seeds into the frozen browser module table: client
 // bundles leave these to the injected `require` instead of inlining. (This
-// list mirrors the harness client build baseline for dsh 0.1.2-rc.1.)
+// list mirrors the harness client build baseline for dsh 0.1.5-rc.1.)
 const PLATFORM_MODULES = [
   'react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/cordis',
   '@deepseek-ai/dsh-client-store',
   '@deepseek-ai/dsh-client-ui-slots',
   '@deepseek-ai/dsh-client-ui-primitives',
+  '@deepseek-ai/dsh-client-ui-dockkit',
 ]
 
 // Every module specifier this plugin's client bundle may require at runtime:
