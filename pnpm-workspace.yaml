@@ -8,8 +8,8 @@ packages:
 allowBuilds:
   esbuild: true
 
-# The harness 0.1.2-rc.1 line ships as release candidates; keep pnpm's
+# The harness 0.1.5-rc.1 line ships as release candidates; keep pnpm's
 # release-age guard from refusing our pinned rc devDependencies.
 minimumReleaseAgeExclude:
-  - '@deepseek-ai/dsh-settings@0.1.2-rc.1'
+  - '@deepseek-ai/dsh-settings@0.1.5-rc.1'
   - '@deepseek-ai/schemastery@3.18.2'

@@ -2,12 +2,14 @@
  * dsh-quick-replies — Client half (installed package bundle entry).
  *
  * Registers ONE entry on `conversation.input.dock` (id `quick-replies`,
- * order 30): the quick-reply bar above the composer. All DSH service access
- * is concentrated here in small guarded readers (the bar itself only talks to
- * plugin-owned stores); the send path goes exclusively through the session
- * face's public `prompt` RPC (see send/sender.ts). Styles ride one
- * plugin-owned `<style data-plugin-css>` tag injected at materialization and
- * removed on teardown.
+ * order 30): the quick-reply bar above the composer. On DSH 0.1.5-rc.1 the
+ * dock owner share is an `InputZone` (`session` + `input`); session identity
+ * also arrives through session-standard props (`sessionId`). All other DSH
+ * service access is concentrated here in small guarded readers (the bar
+ * itself only talks to plugin-owned stores); the send path goes exclusively
+ * through the session face's public `prompt` RPC (see send/sender.ts). Styles
+ * ride one plugin-owned `<style data-plugin-css>` tag injected at
+ * materialization and removed on teardown.
  *
  * This module is the body of the package's `./client` bundle: tsdown bundles
  * it (external `react`/platform modules, supplied by the browser module table
@@ -70,6 +72,21 @@ function installStyles(): () => void {
     const live = document.querySelector(`style[data-plugin-css="${CSS_TAG_ID}"]`)
     if (live !== null && live.parentNode !== null) live.parentNode.removeChild(live)
   }
+}
+
+/**
+ * Resolve the dock's session identity from DSH 0.1.5 session-standard props
+ * (`sessionId`) or the InputZone owner share (`session.sessionId`). Older
+ * shells that only passed a bare sessionId still work through the first arm.
+ */
+function sessionIdOf(props: { sessionId?: unknown; session?: unknown } & Record<string, unknown>): string | undefined {
+  if (typeof props.sessionId === 'string' && props.sessionId !== '') return props.sessionId
+  const session = props.session
+  if (session !== null && typeof session === 'object') {
+    const id = (session as { sessionId?: unknown }).sessionId
+    if (typeof id === 'string' && id !== '') return id
+  }
+  return undefined
 }
 
 function makeContextReaders(ctx: ClientCtx) {
@@ -171,14 +188,15 @@ function apply(ctx: ClientCtx): void {
     },
   }
 
-  // The single dock entry. The host hides the whole composer area on takeover
-  // (approval/plan/question) — that is correct behavior, never bypassed with
-  // a floating surface.
+  // The single dock entry. Owner share is InputZone ({ session, input });
+  // session-standard props still supply sessionId. The host hides the whole
+  // composer area on takeover (approval/plan/question) — that is correct
+  // behavior, never bypassed with a floating surface.
   ctx.slots.inject('conversation.input.dock', () => {
     return ctx.slots.register(
       { name: 'conversation.input.dock', id: 'quick-replies', order: 30 },
       (props) => {
-        const sessionId = typeof props.sessionId === 'string' && props.sessionId !== '' ? props.sessionId : undefined
+        const sessionId = sessionIdOf(props)
         return createElement(QuickRepliesDock, { sessionId, handles })
       },
     )

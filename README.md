@@ -39,6 +39,12 @@ The reply library lives in the DSH Host global settings namespace `quick-replies
 
 ## Quick start
 
+Requirements:
+
+- DeepSeek Harness with a Web profile
+- Node.js 20 or newer
+- Verified DSH version: `0.1.5-rc.1` (plugin `0.1.2`)
+
 If the `dsh` command is already installed:
 
 ```sh
@@ -82,11 +88,14 @@ Four defaults ship with the plugin and can all be deleted; they are not recreate
 
 ## Compatibility
 
+Current release: plugin **`0.1.2`** is verified against DeepSeek Harness **`0.1.5-rc.1`**.
+
 | Plugin | Verified DeepSeek Harness |
 | --- | --- |
 | `0.1.0`–`0.1.1` | `0.1.2-rc.1` |
+| `0.1.2` | `0.1.5-rc.1` |
 
-Verify newer DSH releases yourself. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+Use `0.1.2` on DSH `0.1.5-rc.1`. Stay on `0.1.1` (or earlier) while still on DSH `0.1.2-rc.1`. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
 
 ## Uninstall
 

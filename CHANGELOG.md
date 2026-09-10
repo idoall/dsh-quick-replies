@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 — 2026-09-10
+
+Verified DeepSeek Harness: `0.1.5-rc.1`.
+
+- Adapted the Web client half to DeepSeek Harness `0.1.5-rc.1`.
+- Dropped `@deepseek-ai/dsh-client-ui-slots` from `dsh.client.inject` (it is a frozen platform module, not a boot-graph plugin).
+- Read `conversation.input.dock` session identity from session-standard `sessionId` or the `InputZone` owner (`session.sessionId`).
+- Declared compatibility with DSH `0.1.5-rc.1` and aligned `@deepseek-ai/dsh-settings` peer/dev pins.
+
 ## 0.1.1
 
 - CI 只跑 Node 24，避免 jsdom/undici 在 Node 20 上失败。
