@@ -43,7 +43,7 @@
 
 - 带 Web profile 的 DeepSeek Harness
 - Node.js 20 或更新版本
-- 已验证的 DSH 版本：`0.1.5-rc.1`（插件 `0.1.2`）
+- 已验证的 DSH 版本：`0.1.5-rc.1`（插件 `0.1.3`）
 
 已经安装 `dsh` 命令：
 
@@ -86,16 +86,25 @@ dsh plugin --profile web add "link:$(pwd)"
 
 默认四条（可全部删掉，不会自动重生）：继续、中断了请继续、下一步该做什么？、已重启请继续。
 
+### 局域网（非回环页面）访问
+
+DSH 对来源不是 loopback（`localhost` / `127.0.0.1`）的页面会关闭 Host 设置持久化（官方 `dsh-client-ui-settings` README 原文：*Non-loopback pages get no durable settings*）：`settingsScope` 直接返回 `unavailable`，并且从此不发 `settings.describe`。于是经局域网转发插件（`dsh-lan-proxy`、`dsh-bridge`、`dsh-mobile` 等）从另一台设备访问时，所有依赖 Host 设置的界面都会失效——本插件表现为「回复库不可用，无法发送」。
+
+从 `0.1.3` 起，官方 scope 报 `unavailable` 时插件改用与官方 settings Client 相同的公开 Remote（`settings.describe` / `settings.mutate`）直连 Host 的 `quick-replies` 命名空间。因此局域网设备上的读取、编辑、导入导出与回环页面一致，回复库仍是 Host 上共享的那一份；写入仍受 revision 栅栏保护，冲突会明确提示而不会静默覆盖。
+
+若你希望保持 DSH 官方策略（非回环页面完全不落地设置），请停留在 `0.1.2`；或让转发侧声明宿主身份：在返回的 HTML 中、`__DSH_BOOT__` 之前注入 `window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }`。DSH 的 `ctx.connection.isLoopback` 会据此为真，所有依赖设置的界面（含「设置」页）一并恢复；`dsh-mobile` 网关正是这么做的。
+
 ## 兼容性
 
-当前发布：插件 **`0.1.2`** 已针对 DeepSeek Harness **`0.1.5-rc.1`** 验证。
+当前发布：插件 **`0.1.3`** 已针对 DeepSeek Harness **`0.1.5-rc.1`** 验证。
 
 | 插件 | 验证过的 DeepSeek Harness |
 | --- | --- |
 | `0.1.0`–`0.1.1` | `0.1.2-rc.1` |
 | `0.1.2` | `0.1.5-rc.1` |
+| `0.1.3` | `0.1.5-rc.1` |
 
-DSH `0.1.5-rc.1` 请使用 `0.1.2`。仍在 DSH `0.1.2-rc.1` 上时继续使用 `0.1.1`（或更早）。更高 DSH 版本不会被自动宣称为兼容。不兼容时禁用或卸载插件，不要给 DSH 核心打补丁。
+DSH `0.1.5-rc.1` 请使用 `0.1.3`。仍在 DSH `0.1.2-rc.1` 上时继续使用 `0.1.1`（或更早）。更高 DSH 版本不会被自动宣称为兼容。不兼容时禁用或卸载插件，不要给 DSH 核心打补丁。
 
 ## 卸载
 
