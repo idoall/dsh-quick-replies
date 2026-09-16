@@ -86,16 +86,25 @@ Refresh the web UI after install. The host half registers the settings namespace
 
 Four defaults ship with the plugin and can all be deleted; they are not recreated automatically: continue, continue after interrupt, what should I do next?, continue after restart.
 
+### LAN / non-loopback pages
+
+DSH disables Host settings persistence for any page whose origin is not a loopback authority (the official `dsh-client-ui-settings` README states it plainly: *Non-loopback pages get no durable settings*). `settingsScope` then answers `unavailable` and never sends `settings.describe`, so every settings-backed surface goes inert — this bar showed “Reply library unavailable” when the Web UI was reached from another machine through a LAN bridge such as `dsh-lan-proxy`, `dsh-bridge`, or `dsh-mobile`.
+
+From `0.1.3` the plugin falls back to the SAME public Remote the official settings client speaks (`settings.describe` / `settings.mutate`) and therefore keeps reading and writing the one shared Host namespace `quick-replies`. Reads, edits, import/export and the revision fence behave exactly as they do on a loopback page; a refused write surfaces as a conflict instead of a silent overwrite.
+
+If you want DSH's stock policy instead (a non-loopback page never persists settings), stay on `0.1.2`, or let the bridge declare itself the Host: inject `window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }` into the served HTML before `__DSH_BOOT__`. DSH's `ctx.connection.isLoopback` then reads true and every settings-backed surface — including the Settings pages — comes back. The `dsh-mobile` gateway already does this.
+
 ## Compatibility
 
-Current release: plugin **`0.1.2`** is verified against DeepSeek Harness **`0.1.5-rc.1`**.
+Current release: plugin **`0.1.3`** is verified against DeepSeek Harness **`0.1.5-rc.1`**.
 
 | Plugin | Verified DeepSeek Harness |
 | --- | --- |
 | `0.1.0`–`0.1.1` | `0.1.2-rc.1` |
 | `0.1.2` | `0.1.5-rc.1` |
+| `0.1.3` | `0.1.5-rc.1` |
 
-Use `0.1.2` on DSH `0.1.5-rc.1`. Stay on `0.1.1` (or earlier) while still on DSH `0.1.2-rc.1`. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+Use `0.1.3` on DSH `0.1.5-rc.1`. Stay on `0.1.1` (or earlier) while still on DSH `0.1.2-rc.1`. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
 
 ## Uninstall
 

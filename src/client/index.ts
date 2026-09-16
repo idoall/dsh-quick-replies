@@ -21,7 +21,9 @@ import type { ConnectionState, InputPhase, SendEnvironment, SessionRuntime, Sess
 import { DEFAULT_ADMISSION_TIMEOUT_MS, DEFAULT_DEBOUNCE_MS, QuickReplySender } from './send/sender.ts'
 import { QR_NAMESPACE } from '../shared/limits.ts'
 import { createLibraryStore, type LibraryStore } from './settings/libraryStore.ts'
-import { binderOf, scopeOf, type SettingsScopeBinderFace, type SettingsScopeLike } from './settings/scopeFaces.ts'
+import { createHostDirectScope, settingsInvalidationsOf, settingsRemoteFace, settingsRemoteOf, type SettingsRemoteLike } from './settings/hostDirectScope.ts'
+import { createSettingsChannel } from './settings/settingsChannel.ts'
+import { binderOf, scopeOf } from './settings/scopeFaces.ts'
 import { createManageController, type ManageController } from './manage/controller.ts'
 import { createFoldPrefsStore, type FoldPrefsStore } from './prefsStore.ts'
 import { QR_CSS } from './ui/styles.ts'
@@ -57,6 +59,8 @@ interface ClientCtx {
   get(name: string): unknown
   inject(names: string[], callback: (raw: never) => void): unknown
   effect(setup: () => (() => void) | void, label?: string): unknown
+  /** Optional lifecycle event seam (Cordis contexts expose it; guarded here). */
+  on?(name: string, listener: () => void): unknown
 }
 
 /** Inject the plugin stylesheet exactly once; returns its disposer. */
@@ -149,25 +153,79 @@ function apply(ctx: ClientCtx): void {
   const sender = new QuickReplySender()
   const readers = makeContextReaders(ctx)
 
-  // Optional settings surface: bind the Host-served `quick-replies` namespace
-  // when the settings scope composes. Without it the library stays
-  // unavailable (read-only, honest) and the bar shows the unavailable note.
-  const attachSettings = (binder: SettingsScopeBinderFace): void => {
+  // The library's ONE source of truth is the Host `quick-replies` namespace, but
+  // two client channels can serve it: the official `settingsScope` (loopback
+  // pages) and — only when that scope reports the documented non-loopback
+  // degradation — a direct Host channel over the same public Remote. The LAN
+  // page a phone uses is exactly that non-loopback case; without the direct
+  // channel every chip disappears there. See settingsChannel.ts.
+  let remoteSettings: SettingsRemoteLike | undefined
+  /** Resolve the direct channel's Remote face; `ctx.get` covers a payload we could not read. */
+  const directRemote = (): SettingsRemoteLike | undefined => {
+    if (remoteSettings !== undefined) return remoteSettings
     try {
-      const bound = scopeOf(binder.bind({ namespace: QR_NAMESPACE }))
-      if (bound === undefined) return
-      disposers.push(library.attach(bound))
+      remoteSettings = settingsRemoteFace(ctx.get('remote.settings'))
     } catch {
-      // Unreadable settings seam: the library stays unavailable.
+      // The dotted service key is not readable on this context.
     }
+    return remoteSettings
   }
+  const channel = createSettingsChannel({
+    openDirect: () => {
+      const remote = directRemote()
+      return remote === undefined ? undefined : createHostDirectScope(remote, QR_NAMESPACE)
+    },
+  })
+  disposers.push(library.attach(channel), () => channel.dispose())
+
+  // Official seam first: it stays authoritative whenever it is not `unavailable`,
+  // so a loopback page keeps the official semantics and pays no extra wire read.
   try {
     ctx.inject(['settingsScope'], (raw: never) => {
-      const binder = binderOf(raw)
-      if (binder !== undefined) attachSettings(binder)
+      try {
+        const binder = binderOf(raw)
+        if (binder === undefined) return
+        channel.setOfficial(scopeOf(binder.bind({ namespace: QR_NAMESPACE })))
+      } catch {
+        // Unreadable settings seam: the library stays unavailable.
+      }
     })
   } catch {
-    // No settingsScope seam on this host: nothing to bind.
+    // No settingsScope seam on this host: the direct channel is the only hope.
+  }
+
+  // Direct Host channel. The Remote service can arrive before or after the
+  // official scope, so `refresh()` re-evaluates the selection either way; the
+  // document invalidation keeps a phone's copy in step with edits made on
+  // another device, and a reconnect retries a read that was refused.
+  //
+  // Every read here is contained: the injected payload intentionally refuses the
+  // dotted PARENT (`payload.remote` throws "cannot get property … without
+  // inject"), so one unreadable member must never abort the whole wiring.
+  try {
+    ctx.inject(['remote.settings'], (raw: never) => {
+      try {
+        remoteSettings = settingsRemoteOf(raw) ?? remoteSettings
+        channel.refresh()
+        const invalidations = settingsInvalidationsOf(ctx.get('remote'))
+        if (invalidations !== undefined) {
+          disposers.push(invalidations(() => channel.reload()))
+        }
+      } catch {
+        // No usable Remote seam: the direct channel stays closed and the official
+        // scope keeps its verdict.
+      }
+    })
+  } catch {
+    // No Remote seam: non-loopback pages keep the honest unavailable state.
+  }
+  if (typeof ctx.on === 'function') {
+    try {
+      const off = ctx.on('connection/reset', () => channel.reload())
+      if (typeof off === 'function') disposers.push(off as () => void)
+    } catch {
+      // No lifecycle event seam on this host.
+    }
   }
 
   const handles: DockHandles = {
