@@ -19,6 +19,8 @@
 </p>
 
 > DSH Quick Replies is a DeepSeek Harness community plugin. It mounts above the current session composer and does not modify DSH source.
+>
+> **✅ Supports DSH `0.1.7-rc.1` — the latest `0.1.7` release candidate.** Verified on the running release candidate as well as on `0.1.7-alpha.2`; see [Compatibility](#compatibility).
 
 A row of stored text chips sits above the input. A tap sends them as an ordinary user message: `queue` while idle, `steer` when the top-level session is running (handled at the next safe boundary). The plugin never rewrites the draft, never cancels, and never stops work.
 
@@ -43,7 +45,7 @@ Requirements:
 
 - DeepSeek Harness with a Web profile
 - Node.js 20 or newer
-- Verified DSH version: `0.1.7-alpha.2` (plugin `0.1.4`)
+- Verified DSH version: `0.1.7-rc.1` (the latest release candidate) and `0.1.7-alpha.2` — plugin `0.1.5`
 
 If the `dsh` command is already installed:
 
@@ -96,20 +98,21 @@ If you want DSH's stock policy instead (a non-loopback page never persists setti
 
 ## Compatibility
 
-Current release: plugin **`0.1.4`** is verified against DeepSeek Harness **`0.1.7-alpha.2`**.
+Current release: plugin **`0.1.5`** is verified against DeepSeek Harness **`0.1.7-rc.1`** — the latest `0.1.7` release candidate — and against `0.1.7-alpha.2`.
 
 | Plugin | Verified DeepSeek Harness | Notes |
 | --- | --- | --- |
 | `0.1.0`–`0.1.1` | `0.1.2-rc.1` | published |
 | `0.1.2` | `0.1.5-rc.1` | published |
 | `0.1.3` | `0.1.5-rc.1` | published; LAN/non-loopback fallback |
-| **`0.1.4`** | `0.1.7-alpha.2` | Adapts to DSH 0.1.7: the library is the plugin's volatile `Config` (a form namespace is the loader entry id), the official client channel is `ctx.configForms`, and `@deepseek-ai/schemastery` is a peer. |
+| `0.1.4` | `0.1.7-alpha.2` | published; first release on the 0.1.7 line |
+| **`0.1.5`** | **`0.1.7-rc.1`** (latest RC), `0.1.7-alpha.2` | **Supports the newest `0.1.7` release candidate.** No new storage model over `0.1.4`; upgrading needs no data migration. |
 
-Use `0.1.4` on DSH `0.1.7-alpha.2`. **`0.1.4` supports DSH `0.1.7-alpha.2` only.** DSH `0.1.7` removed the runtime `ctx.settings.register(...)` API and the `ctx.settingsScope` service this plugin was built on, so `0.1.4` is the only release that stores a library on that line; on an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+**`0.1.5` supports DSH `0.1.7-rc.1`, the latest release candidate.** The `0.1.7` line removed the runtime `ctx.settings.register(...)` API and the `ctx.settingsScope` service this plugin was built on, and **`0.1.4` already adapted to that** — `0.1.5` confirms the same code runs unchanged on the RC and clears the small things left behind (a dead Host validation helper, and two user-visible error prefixes that still named the pre-0.1.7 `quick-replies` namespace). **Upgrading from `0.1.4` needs no data migration and no config change.** On an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
 
 Two declarations make that work, and a test keeps them honest:
 
-- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0`. The lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` does **not** admit `0.1.7-alpha.2`.
+- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0`, which admits both `0.1.7-alpha.2` and `0.1.7-rc.1` (a prerelease is admitted when some comparator names the same `major.minor.patch`). The lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` would admit **neither**.
 - `@deepseek-ai/schemastery` is a **peer**, not a plain dependency: DSH 0.1.7 resolves only a linked plugin's peer dependencies from the running installation, so a `link:` install of this directory would otherwise fail to import the Host half.
 
 ## Uninstall
