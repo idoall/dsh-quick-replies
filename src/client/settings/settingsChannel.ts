@@ -148,7 +148,7 @@ export function createSettingsChannel(options: SettingsChannelOptions): Settings
     mutate(ops, expectedRevision) {
       const source = active
       if (source === undefined) {
-        return Promise.reject(new Error('quick-replies: settings channel is unavailable'))
+        return Promise.reject(new Error('dsh-quick-replies: settings channel is unavailable'))
       }
       return source.mutate(ops, expectedRevision)
     },

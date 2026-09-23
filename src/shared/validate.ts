@@ -1,12 +1,12 @@
 /**
  * dsh-quick-replies — strict library validation shared by every gate.
  *
- * One implementation is used by the Host registration validate hook, the
- * client store when mirroring the settings scope, and the import preview, so
- * a malformed section can never slip past one gate while another rejects it.
- * Values are treated as untrusted JSON (settings documents and imports can be
- * edited by hand or another browser), so every field is re-proved, unknown
- * structure is refused, and nothing is ever coerced.
+ * One implementation is used by the client store when mirroring the settings
+ * channel and by the import preview, so a malformed section can never slip past
+ * one gate while another rejects it. Values are treated as untrusted JSON (the
+ * profile patch and imported files can be edited by hand or by another
+ * browser), so every field is re-proved, unknown structure is refused, and
+ * nothing is ever coerced.
  */
 import {
   ID_PATTERN,
@@ -110,17 +110,6 @@ export function judgeItem(input: { id: string; label: string; content: string; e
   const judged = judgeSection(wrapped)
   if (judged.kind === 'ok') return null
   return judged.kind === 'invalid' ? judged.issue : 'item-content-invalid'
-}
-
-/** Throw helper used by the Host registration validate hook (dsh-settings contract). */
-export function assertSectionValid(value: unknown): void {
-  const judged = judgeSection(value)
-  if (judged.kind === 'invalid') {
-    throw new Error(`quick-replies: invalid library section (${judged.issue})`)
-  }
-  if (judged.kind === 'unsupported-version') {
-    throw new Error(`quick-replies: unsupported library version ${String(judged.version)}`)
-  }
 }
 
 /** Narrow one valid section into typed items; invalid sections become undefined. */
