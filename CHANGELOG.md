@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.5 — 2026-09-23
+
+Verified DeepSeek Harness: `0.1.7-rc.1`（官方最新的候选版本），同时兼容 `0.1.7-alpha.2`。
+
+**本版适配并验证了最新的 `0.1.7-rc.1` 候选版本。** 存储模型与 `0.1.4` 完全一致，**从 `0.1.4` 升级无需迁移数据、无需改配置**。
+
+- **在运行中的 `0.1.7-rc.1` 实例上实测通过**：Host 侧 `Config.listConfigs` 仍把 `dsh-quick-replies` 识别为可配置的表单条目（`status: "schema"`），客户端 `conversation.input.dock` 的 `quick-replies` occupant 仍为 `active: true`，快捷栏照常渲染与读写。
+- **核对过 rc.1 的实际代码与官方说明**：`ctx.configForms` 仍在、`ctx.settingsScope` 仍不存在、`dsh-settings` 仍无运行时 `register`；官方 rc.1 说明中「设置改由当前 Profile 的插件配置保存；旧 settings.yaml 仅尝试导入一次」正是 `0.1.4` 已适配的那批变更。
+- **peer 范围无需改动**：`>=0.1.7-alpha.2 <0.2.0` 在 node-semver 默认预发布规则下同时接纳 `0.1.7-alpha.2` 与 `0.1.7-rc.1`（只要范围里有比较符写了同一个 `major.minor.patch`，该版本的预发布即被接纳）。`dsh.compatibility.dshReleases` 现同时记录两者。
+- **清理 `0.1.4` 遗留**：删除已无调用方的 `assertSectionValid`（其注释仍引用 0.1.7 已移除的 Host registration validate hook）；两处**用户可见**的错误前缀由旧命名空间 `quick-replies:` 改为实际寻址的条目 id `dsh-quick-replies:`。
+- **文档**：中英文 README 在顶部与兼容性章节明确标注已支持最新 RC。
+
 ## 0.1.4 — 2026-09-23
 
 Verified DeepSeek Harness: `0.1.7-alpha.2`.
