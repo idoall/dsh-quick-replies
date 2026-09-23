@@ -1,7 +1,9 @@
 # Bundle patch layer: the row loads the package's main entry as the host half
-# (a plain Cordis plugin that registers the `quick-replies` settings
-# namespace); the package.json `dsh.client` declaration makes the web app load
-# the ./client bundle as the browser half (the input.dock quick-reply bar).
+# (a plain Cordis plugin whose exported Config IS the `dsh-quick-replies`
+# settings form — DSH 0.1.7 identifies a form by the Loader entry id, so the
+# `id` below is the storage namespace and must not change); the package.json
+# `dsh.client` declaration makes the web app load the ./client bundle as the
+# browser half (the input.dock quick-reply bar).
 - insert:
     - id: dsh-quick-replies
       name: dsh-quick-replies

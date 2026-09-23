@@ -3,13 +3,20 @@
  *
  * These are V1 PRODUCT limits for the plugin's own library (the requirements
  * document is explicit that they must not be presented as DSH server-side
- * limits). They are shared verbatim by the Host schema/validator, the client
+ * limits). They are shared verbatim by the Host Config schema, the client
  * store, and the import validator so every gate counts the same way.
  */
 import type { QuickReply } from './types.ts'
 
-/** Host settings namespace for the reply library (lowercase-hyphen). */
-export const QR_NAMESPACE = 'quick-replies' as const
+/**
+ * Settings namespace owning the reply library.
+ *
+ * DSH 0.1.7 identifies a settings form by the Loader entry id
+ * (`docs/subsystems/settings.md`), so this is the plugin's own bundle-patch id
+ * — `cordis.patch.yml` must keep inserting `id: dsh-quick-replies`. It was
+ * `quick-replies` while 0.1.6 registered an independent namespace at runtime.
+ */
+export const QR_NAMESPACE = 'dsh-quick-replies' as const
 
 /** Library document schema version (V1). */
 export const SCHEMA_VERSION = 1 as const
@@ -33,9 +40,10 @@ export const ID_PATTERN = /^[A-Za-z0-9._:-]+$/
 
 /**
  * The four built-in default replies (pure text, no automation meaning). They
- * compose as the settings namespace `base` layer, so a browser that never
- * wrote the namespace sees them — but once the user stores ANY section
- * (including an explicit empty `items` list) they never come back.
+ * are the `items` default of the Host Config schema, which is the composition
+ * `base` layer a fresh profile resolves to — but once the user stores ANY
+ * `items` value (including an explicit empty list) the stored array replaces
+ * them wholesale and they never come back.
  */
 export const DEFAULT_ITEMS: readonly QuickReply[] = [
   { id: 'qr-default-continue', label: '继续', content: '继续', enabled: true },

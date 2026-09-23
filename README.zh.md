@@ -22,7 +22,7 @@
 
 在输入框上方显示一排快捷文本。点击后作为普通用户消息发送：会话空闲时进入队列（`queue`），顶层会话运行中则走 steer（下一步安全边界处理）。不改草稿、不 cancel、不 stop。
 
-回复库保存在 DSH Host 全局设置命名空间 `quick-replies`，同一 Host 下多浏览器/设备共享。折叠偏好按当前浏览器分别记住。
+回复库保存在 DSH Host 的设置条目 `dsh-quick-replies`（插件自身的 loader 条目，持久化在 profile patch 中），同一 Host 下多浏览器/设备共享。折叠偏好按当前浏览器分别记住。
 
 <p align="center">
   <img src="./assets/ui.png" width="100%" alt="DeepSeek Harness 输入区上方的快捷回复栏：继续等 chip、添加与管理按钮，以及消息输入框">
@@ -43,7 +43,7 @@
 
 - 带 Web profile 的 DeepSeek Harness
 - Node.js 20 或更新版本
-- 已验证的 DSH 版本：`0.1.5-rc.1`（插件 `0.1.3`）
+- 已验证的 DSH 版本：`0.1.7-alpha.2`（插件 `0.1.4`）
 
 已经安装 `dsh` 命令：
 
@@ -74,7 +74,7 @@ pnpm run build
 dsh plugin --profile web add "link:$(pwd)"
 ```
 
-安装后刷新 Web 界面。Host 半边通过 `cordis.patch.yml` 注册设置命名空间；客户端在 `conversation.input.dock` 挂载快捷栏。回复库写在 `~/.dsh/settings.yaml` 的 `quick-replies` 段，不属于插件安装目录。
+安装后刷新 Web 界面。Host 半边把回复库声明为自己的 `Config`——DSH 0.1.7 中设置表单的命名空间就是 loader 条目 id，所以这个 `Config` 就是 `dsh-quick-replies` 设置表单；客户端在 `conversation.input.dock` 挂载快捷栏。回复库写在该条目 `config` 里，落在当前 profile 的 `cordis.patch.yml`（`~/.dsh/profiles/<profile>/cordis.patch.yml`），不属于插件安装目录。
 
 ## 使用
 
@@ -88,23 +88,29 @@ dsh plugin --profile web add "link:$(pwd)"
 
 ### 局域网（非回环页面）访问
 
-DSH 对来源不是 loopback（`localhost` / `127.0.0.1`）的页面会关闭 Host 设置持久化（官方 `dsh-client-ui-settings` README 原文：*Non-loopback pages get no durable settings*）：`settingsScope` 直接返回 `unavailable`，并且从此不发 `settings.describe`。于是经局域网转发插件（`dsh-lan-proxy`、`dsh-bridge`、`dsh-mobile` 等）从另一台设备访问时，所有依赖 Host 设置的界面都会失效——本插件表现为「回复库不可用，无法发送」。
+DSH 对来源不是 loopback（`localhost` / `127.0.0.1`）的页面会关闭 Host 设置持久化（官方 `dsh-client-ui-settings` README 原文：*Non-loopback pages get no durable settings*）：所有按条目寻址的设置表单（`ctx.configForms.get(id)`，DSH 0.1.7 中已移除的 `settingsScope` 的继任者）此时被固定为 `memory`，直接返回 `unavailable`，并且从此不发 `settings.describe`。于是经局域网转发插件（`dsh-lan-proxy`、`dsh-bridge`、`dsh-mobile` 等）从另一台设备访问时，所有依赖 Host 设置的界面都会失效——本插件表现为「回复库不可用，无法发送」。
 
-从 `0.1.3` 起，官方 scope 报 `unavailable` 时插件改用与官方 settings Client 相同的公开 Remote（`settings.describe` / `settings.mutate`）直连 Host 的 `quick-replies` 命名空间。因此局域网设备上的读取、编辑、导入导出与回环页面一致，回复库仍是 Host 上共享的那一份；写入仍受 revision 栅栏保护，冲突会明确提示而不会静默覆盖。
+插件会改用与官方 settings Client 相同的公开 Remote（`settings.describe` / `settings.mutate`）直连 Host 上那份 `dsh-quick-replies` 条目。因此局域网设备上的读取、编辑、导入导出与回环页面一致，回复库仍是 Host 上共享的那一份；写入仍受 revision 栅栏保护，冲突会明确提示而不会静默覆盖。回环页面继续走官方表单（共享同一份 describe mirror、官方写队列），不会多一次线上读取。
 
-若你希望保持 DSH 官方策略（非回环页面完全不落地设置），请停留在 `0.1.2`；或让转发侧声明宿主身份：在返回的 HTML 中、`__DSH_BOOT__` 之前注入 `window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }`。DSH 的 `ctx.connection.isLoopback` 会据此为真，所有依赖设置的界面（含「设置」页）一并恢复；`dsh-mobile` 网关正是这么做的。
+若你希望保持 DSH 官方策略（非回环页面完全不落地设置），请停留在 `0.1.2`；或让转发侧声明宿主身份：在返回的 HTML 中、`__DSH_BOOT__` 之前注入 `window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }`。DSH 的 loopback 判定会据此为真，所有依赖设置的界面（含「设置」页）一并恢复；`dsh-mobile` 网关正是这么做的。
 
 ## 兼容性
 
-当前发布：插件 **`0.1.3`** 已针对 DeepSeek Harness **`0.1.5-rc.1`** 验证。
+当前发布：插件 **`0.1.4`** 已针对 DeepSeek Harness **`0.1.7-alpha.2`** 验证。
 
-| 插件 | 验证过的 DeepSeek Harness |
-| --- | --- |
-| `0.1.0`–`0.1.1` | `0.1.2-rc.1` |
-| `0.1.2` | `0.1.5-rc.1` |
-| `0.1.3` | `0.1.5-rc.1` |
+| 插件 | 验证过的 DeepSeek Harness | 说明 |
+| --- | --- | --- |
+| `0.1.0`–`0.1.1` | `0.1.2-rc.1` | 已发布 |
+| `0.1.2` | `0.1.5-rc.1` | 已发布 |
+| `0.1.3` | `0.1.5-rc.1` | 已发布；局域网/非回环兜底 |
+| **`0.1.4`** | `0.1.7-alpha.2` | 适配 DSH 0.1.7：回复库就是插件的 volatile `Config`（设置表单命名空间 = loader 条目 id），官方客户端通道改为 `ctx.configForms`，`@deepseek-ai/schemastery` 改为 peer。 |
 
-DSH `0.1.5-rc.1` 请使用 `0.1.3`。仍在 DSH `0.1.2-rc.1` 上时继续使用 `0.1.1`（或更早）。更高 DSH 版本不会被自动宣称为兼容。不兼容时禁用或卸载插件，不要给 DSH 核心打补丁。
+DSH `0.1.7-alpha.2` 请使用 `0.1.4`。**`0.1.4` 只支持 DSH `0.1.7-alpha.2`。** DSH `0.1.7` 移除了本插件赖以工作的运行时 `ctx.settings.register(...)` API 与 `ctx.settingsScope` 服务，因此该版本线上只有 `0.1.4` 能把回复库存下来；仍在更早的 DSH（含 `0.1.6-alpha.2`）上时，请继续使用插件 **`0.1.3`**。更高 DSH 版本不会被自动宣称为兼容。不兼容时禁用或卸载插件，不要给 DSH 核心打补丁。
+
+有两处声明支撑这一点，并由测试守住：
+
+- `dsh.engines.dsh` 与 `peerDependencies['@deepseek-ai/dsh-settings']` 都声明 `>=0.1.7-alpha.2 <0.2.0`。下界特意写成这个 alpha：按 node-semver 默认的预发布规则，`>=0.1.6-0 <0.2.0` 这样的范围**并不接纳** `0.1.7-alpha.2`。
+- `@deepseek-ai/schemastery` 是 **peer**，不是普通依赖：DSH 0.1.7 只从运行安装解析 link 插件的 peer 依赖，否则 `link:` 安装会连 Host 半边都 import 失败。
 
 ## 卸载
 
@@ -112,7 +118,7 @@ DSH `0.1.5-rc.1` 请使用 `0.1.3`。仍在 DSH `0.1.2-rc.1` 上时继续使用 
 dsh plugin --profile web remove dsh-quick-replies
 ```
 
-卸载不会删除设置里的回复库。需要清库时，先在管理界面导出 JSON，再手动删除设置中的 `quick-replies` 命名空间。
+卸载不会删除设置里的回复库。需要清库时，先在管理界面导出 JSON，再手动删除当前 profile 的 `cordis.patch.yml` 中 `dsh-quick-replies` 条目的 `config`。
 
 ## 开发
 
@@ -121,6 +127,8 @@ pnpm install
 pnpm run test
 pnpm run build
 ```
+
+`pnpm run test` 会跑 `tsc --noEmit` 以及全部 vitest 项目：共享/Host 逻辑、客户端逻辑与 jsdom UI 用例，还有一条会按 DSH 的方式加载 `lib/index.js`、`lib/client.js` 的构建产物用例。产物用例需要有东西可跑，所以先执行一次 `pnpm run build`。
 
 推送 `v*` 标签后，GitHub Actions 会跑测试、打包，并在配置了 `NPM_TOKEN` 时发布到 npm、创建 GitHub Release。
 

@@ -1,8 +1,8 @@
 /**
  * dsh-quick-replies — library store (browser half).
  *
- * Owns the reactive mirror over the `quick-replies` settings scope and every
- * CRUD operation the management UI issues. Rules (docs/REQUIREMENTS.md
+ * Owns the reactive mirror over the `dsh-quick-replies` settings entry and
+ * every CRUD operation the management UI issues. Rules (docs/REQUIREMENTS.md
  * FR-08/FR-09):
  *
  * - While the scope is loading, NO sendable (possibly stale or fabricated)

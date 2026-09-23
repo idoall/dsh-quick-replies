@@ -2,14 +2,20 @@
  * dsh-quick-replies — Client half (installed package bundle entry).
  *
  * Registers ONE entry on `conversation.input.dock` (id `quick-replies`,
- * order 30): the quick-reply bar above the composer. On DSH 0.1.5-rc.1 the
- * dock owner share is an `InputZone` (`session` + `input`); session identity
- * also arrives through session-standard props (`sessionId`). All other DSH
- * service access is concentrated here in small guarded readers (the bar
- * itself only talks to plugin-owned stores); the send path goes exclusively
- * through the session face's public `prompt` RPC (see send/sender.ts). Styles
- * ride one plugin-owned `<style data-plugin-css>` tag injected at
- * materialization and removed on teardown.
+ * order 30): the quick-reply bar above the composer. The dock owner share is an
+ * `InputZone` (`session` + `input`); session identity also arrives through
+ * session-standard props (`sessionId`). All other DSH service access is
+ * concentrated here in small guarded readers (the bar itself only talks to
+ * plugin-owned stores); the send path goes exclusively through the session
+ * face's public `prompt` RPC (see send/sender.ts). Styles ride one
+ * plugin-owned `<style data-plugin-css>` tag injected at materialization and
+ * removed on teardown.
+ *
+ * Library storage is the Host-side `dsh-quick-replies` settings entry. Two
+ * client channels can serve it: the official `ctx.configForms` form (the DSH
+ * 0.1.7 successor of the removed `settingsScope` service) and — on the
+ * non-loopback pages where that form is deliberately inert — a direct Host
+ * channel over `remote.settings`. See settingsChannel.ts.
  *
  * This module is the body of the package's `./client` bundle: tsdown bundles
  * it (external `react`/platform modules, supplied by the browser module table
@@ -23,7 +29,7 @@ import { QR_NAMESPACE } from '../shared/limits.ts'
 import { createLibraryStore, type LibraryStore } from './settings/libraryStore.ts'
 import { createHostDirectScope, settingsInvalidationsOf, settingsRemoteFace, settingsRemoteOf, type SettingsRemoteLike } from './settings/hostDirectScope.ts'
 import { createSettingsChannel } from './settings/settingsChannel.ts'
-import { binderOf, scopeOf } from './settings/scopeFaces.ts'
+import { configFormScope, configFormsOf } from './settings/configFormScope.ts'
 import { createManageController, type ManageController } from './manage/controller.ts'
 import { createFoldPrefsStore, type FoldPrefsStore } from './prefsStore.ts'
 import { QR_CSS } from './ui/styles.ts'
@@ -79,9 +85,10 @@ function installStyles(): () => void {
 }
 
 /**
- * Resolve the dock's session identity from DSH 0.1.5 session-standard props
- * (`sessionId`) or the InputZone owner share (`session.sessionId`). Older
- * shells that only passed a bare sessionId still work through the first arm.
+ * Resolve the dock's session identity from the session-standard props
+ * (`sessionId`, still delivered by 0.1.7) or the InputZone owner share
+ * (`session.sessionId`). Older shells that only passed a bare sessionId still
+ * work through the first arm.
  */
 function sessionIdOf(props: { sessionId?: unknown; session?: unknown } & Record<string, unknown>): string | undefined {
   if (typeof props.sessionId === 'string' && props.sessionId !== '') return props.sessionId
@@ -153,12 +160,13 @@ function apply(ctx: ClientCtx): void {
   const sender = new QuickReplySender()
   const readers = makeContextReaders(ctx)
 
-  // The library's ONE source of truth is the Host `quick-replies` namespace, but
-  // two client channels can serve it: the official `settingsScope` (loopback
-  // pages) and — only when that scope reports the documented non-loopback
-  // degradation — a direct Host channel over the same public Remote. The LAN
-  // page a phone uses is exactly that non-loopback case; without the direct
-  // channel every chip disappears there. See settingsChannel.ts.
+  // The library's ONE source of truth is the Host `dsh-quick-replies` settings
+  // entry, but two client channels can serve it: the official
+  // `ctx.configForms.get(entryId)` form (loopback pages) and — only when that
+  // form reports the documented non-loopback degradation — a direct Host
+  // channel over the same public Remote. The LAN page a phone uses is exactly
+  // that non-loopback case; without the direct channel every chip disappears
+  // there. See settingsChannel.ts.
   let remoteSettings: SettingsRemoteLike | undefined
   /** Resolve the direct channel's Remote face; `ctx.get` covers a payload we could not read. */
   const directRemote = (): SettingsRemoteLike | undefined => {
@@ -179,19 +187,22 @@ function apply(ctx: ClientCtx): void {
   disposers.push(library.attach(channel), () => channel.dispose())
 
   // Official seam first: it stays authoritative whenever it is not `unavailable`,
-  // so a loopback page keeps the official semantics and pays no extra wire read.
+  // so a loopback page keeps the official semantics (one shared describe mirror,
+  // the official write queue) and pays no extra wire read. DSH 0.1.7 replaced
+  // the per-namespace `settingsScope` service with these entry-addressed forms,
+  // keyed by the Loader entry id the Host Config half owns (QR_NAMESPACE).
   try {
-    ctx.inject(['settingsScope'], (raw: never) => {
+    ctx.inject(['configForms'], (raw: never) => {
       try {
-        const binder = binderOf(raw)
-        if (binder === undefined) return
-        channel.setOfficial(scopeOf(binder.bind({ namespace: QR_NAMESPACE })))
+        const forms = configFormsOf(raw)
+        if (forms === undefined) return
+        channel.setOfficial(configFormScope(forms.get<unknown>(QR_NAMESPACE)))
       } catch {
         // Unreadable settings seam: the library stays unavailable.
       }
     })
   } catch {
-    // No settingsScope seam on this host: the direct channel is the only hope.
+    // No configForms seam on this host: the direct channel is the only hope.
   }
 
   // Direct Host channel. The Remote service can arrive before or after the

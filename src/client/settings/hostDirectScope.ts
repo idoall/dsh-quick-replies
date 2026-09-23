@@ -3,26 +3,26 @@
  *
  * WHY THIS EXISTS
  *
- * DSH's settings Client keeps Host persistence disabled on any page whose
- * location is not a loopback authority. `settingsScope.bind()` then answers
- * `status: 'unavailable'` immediately and NEVER sends `settings.describe`
- * (dsh-client-ui-settings README, "Known Limitations": "Non-loopback pages get
- * no durable settings — this Client keeps Host persistence disabled there, so a
- * scope starts `unavailable` and never crosses the wire; every row it backs is
- * inert even though Connection authentication covers the API").
+ * DSH keeps Host persistence disabled on any page whose location is not a
+ * loopback authority: `@deepseek-ai/dsh-client-ui-settings` resolves its
+ * persistence mode from `remote.$host.isLoopback` and pins a remote page to
+ * `memory`. Every entry-addressed form (`ctx.configForms.get(id)`, the DSH
+ * 0.1.7 successor of `settingsScope.bind()`) is then terminally `unavailable`,
+ * never sends `settings.describe`, and refuses every write — every row it backs
+ * is inert even though Connection authentication covers the API.
  *
  * A LAN page is exactly where this bar is used from a phone, so the whole
- * `quick-replies` library — which lives in the Host settings document — would
+ * `dsh-quick-replies` library — which lives in the Host settings entry — would
  * disappear there even though the API answers and the page is authenticated.
  *
- * This module speaks the SAME public Remote the official scope speaks
+ * This module speaks the SAME public Remote the official form speaks
  * (`settings.describe` / `settings.mutate`, the generated Typert face mounted by
  * `@deepseek-ai/dsh-api-remotes`) and derives the same per-namespace snapshot
  * shape. The library therefore keeps its ONE source of truth (the Host
- * `quick-replies` namespace, shared across devices) instead of degrading to
+ * `dsh-quick-replies` entry, shared across devices) instead of degrading to
  * per-browser storage no other device can see.
  *
- * This channel is opened ONLY when the official scope reports `unavailable`
+ * This channel is opened ONLY when the official form reports `unavailable`
  * (see `settingsChannel.ts`), so loopback pages keep the official path and pay
  * no extra wire read. Everything here is guarded: an absent Remote, a refused
  * read, or a malformed answer leaves the library exactly as unavailable as it

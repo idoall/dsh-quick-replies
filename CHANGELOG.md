@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.4 — 2026-09-23
+
+Verified DeepSeek Harness: `0.1.7-alpha.2`.
+
+0.1.7 移除了本插件赖以工作的两套 API，因此这是一次必需的重写而非增量修补。**`0.1.4` 只支持 DSH `0.1.7-alpha.2`**；更早的 DSH（含 `0.1.6-alpha.2`）请继续用 `0.1.3`。
+
+- **宿主半：`settings.register` 已不存在（致命项）**。0.1.7 的 `ctx.settings` 只投影各 Loader 条目自身 `Config` 的 **volatile** 字段，且**设置表单的命名空间就是条目 id**（`docs/subsystems/settings.md`）。原先 `sctx.settings.register(QR_NAMESPACE, schema, { base, applies, validate })` 会抛 `register is not a function` 并被容错吞掉，`quick-replies` 命名空间从此永远不存在，快捷栏在 0.1.7 上必然全灭。现在宿主半导出 `Config`（schemastery），`schemaVersion` 与 `items` 均标 `.volatile()`：库的每次编辑都提交进运行中的引用并发 `loader/volatile-update`，不会重挂载插件。原「四个内置回复」成为 `items` 的 schema 默认值（即解析后的 composition base）；用户删除全部条目写入 `items: []` 仍是用户层覆盖，不会退回内置。
+- **命名空间改名**：`quick-replies` → `dsh-quick-replies`（= `cordis.patch.yml` 的 insert id）。`cordis.patch.yml` 里的 `id` 从此**就是**存储键，不可再改。
+- **存储位置变更**：回复库不再写在 `~/.dsh/settings.yaml`，而是作为该条目的 `config` 落在当前 profile 的 `cordis.patch.yml`。这是 0.1.7 官方的插件偏好模型（`configEditor.edit()` 会为 bundle insert 出来的条目追加 profile override），写入仍是原子替换并保留 YAML 注释。
+- **客户端：`ctx.settingsScope` 服务已不存在**。官方通道改为 `ctx.configForms.get(entryId)`（`@deepseek-ai/dsh-client-ui-settings`），新增 `configFormScope.ts` 把它投影到插件自己的 scope 契约上；`mutate` 返回 `false`（被拒）会翻译成拒绝，管理界面的冲突提示得以保留。回环页面依旧优先走官方通道，不多发线上读取；局域网页面依旧回落到 `remote.settings` 直连，跨设备共享语义不变。
+- **抑制重复的自动表单页**：`Config` 出现后 DSH 会默认为该条目生成一个通用表单，与本插件自带的管理弹窗重复。按官方惯例（`ui-theme`、`ui-chat`、`ui-conversation` 同样做法）注册 `settings.configure({ auto: false })`；命名空间行本身仍留在 `settings.describe()` 中，读写不受影响。
+- **`@deepseek-ai/schemastery` 由普通 dependency 改为 peer**（同时保留 devDependency）：DSH 0.1.7 只从运行安装解析 link 插件的 peer 依赖，普通依赖会在插件自己的 `node_modules` 下查找，而本仓库不提供该目录，`link:` 安装时 Host 半边会 import 失败。
+- **兼容性声明修正**：`dsh.engines.dsh` 与 `dsh-settings` peer 范围改为 `>=0.1.7-alpha.2 <0.2.0`，`dsh.compatibility.dshReleases` 记 `0.1.7-alpha.2`。下界必须写这个 alpha：按 node-semver 默认预发布规则，`>=0.1.6-0 <0.2.0` 并不接纳 `0.1.7-alpha.2`。另补 `dsh.manifestVersion`，并在 `dsh.client.inject` 中补 `@deepseek-ai/dsh-api-remotes`（直连通道直接使用 `remote.settings`）。
+
 ## 0.1.3 — 2026-09-16
 
 Verified DeepSeek Harness: `0.1.5-rc.1`.
