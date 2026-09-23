@@ -18,29 +18,65 @@ const CLIENT = `${ROOT}lib/client.js`
 const skip = !existsSync(HOST) || !existsSync(CLIENT)
 
 describe.skipIf(skip)('built host half (lib/index.js)', () => {
-  it('exports a Cordis plugin shape and registers the quick-replies namespace', async () => {
+  it('exports a Cordis plugin shape whose Config is the reply-library settings form', async () => {
     const mod = await import(HOST)
     expect(mod.name).toBe('dsh-quick-replies')
     expect(mod.inject).toEqual([])
     expect(typeof mod.apply).toBe('function')
 
-    let registered: { ns: string; schema: unknown; options: unknown } | undefined
-    const settings = {
-      register(ns: string, schema: unknown, options: unknown) {
-        registered = { ns, schema, options }
-        return { get: () => ({ schemaVersion: 1, items: [] }) }
+    // DSH 0.1.7 has no `settings.register`: a plugin's Config IS its settings
+    // form, and the form namespace is this Loader entry id.
+    expect(mod.Config).toBeDefined()
+    expect(typeof mod.Config).toBe('function')
+    // Every field is volatile, so a parsed field is a stable reference read
+    // through `.get()` — the shape DSH's own `plainConfig()` unwraps before a
+    // namespace view crosses the wire.
+    const resolved = mod.Config({}) as {
+      schemaVersion: { get(): number }
+      items: { get(): unknown[] }
+    }
+    expect(resolved.schemaVersion.get()).toBe(1)
+    // The `items` default is the composition base a fresh profile resolves to.
+    expect(resolved.items.get()).toHaveLength(4)
+    // A stored section wins over that default, including an explicit empty list.
+    const stored = mod.Config({ items: [] }) as { items: { get(): unknown[] } }
+    expect(stored.items.get()).toEqual([])
+  })
+
+  it('suppresses the auto-generated settings page for its own entry', async () => {
+    const mod = await import(HOST)
+    const fiber = { id: 'dsh-quick-replies' }
+    const configureCalls: Array<{ presentation: { auto?: boolean }; owner: unknown }> = []
+    const disposers: Array<() => void> = []
+    const child = {
+      effect(setup: () => (() => void) | void) {
+        const dispose = setup()
+        if (typeof dispose === 'function') disposers.push(dispose)
+      },
+      settings: {
+        configure(presentation: { auto?: boolean }, owner: unknown) {
+          configureCalls.push({ presentation, owner })
+          return () => {}
+        },
       },
     }
     const ctx = {
-      inject(names: string[], cb: (raw: { settings: typeof settings }) => void) {
-        cb({ settings })
+      fiber,
+      inject(names: string[], cb: (raw: unknown) => void) {
+        expect(names).toEqual(['settings'])
+        cb(child)
       },
     }
-    mod.apply(ctx)
-    expect(registered?.ns).toBe('quick-replies')
-    // Composition base = the four built-in replies.
-    const base = (registered!.options as { base?: { items?: unknown[] } }).base
-    expect(base?.items).toHaveLength(4)
+    mod.apply(ctx as never)
+    expect(configureCalls).toEqual([{ presentation: { auto: false }, owner: fiber }])
+    expect(disposers).toHaveLength(1)
+    expect(() => disposers[0]!()).not.toThrow()
+  })
+
+  it('stays inert when no settings service is composed', async () => {
+    const mod = await import(HOST)
+    const ctx = { fiber: {}, inject() { /* the service never arrives */ } }
+    expect(() => mod.apply(ctx as never)).not.toThrow()
   })
 })
 

@@ -22,7 +22,7 @@
 
 A row of stored text chips sits above the input. A tap sends them as an ordinary user message: `queue` while idle, `steer` when the top-level session is running (handled at the next safe boundary). The plugin never rewrites the draft, never cancels, and never stops work.
 
-The reply library lives in the DSH Host global settings namespace `quick-replies`, shared across browsers and devices on the same Host. Fold preferences are remembered per browser.
+The reply library lives in the DSH Host settings entry `dsh-quick-replies` (the plugin's own loader entry, persisted in the active profile's patch), shared across browsers and devices on the same Host. Fold preferences are remembered per browser.
 
 <p align="center">
   <img src="./assets/ui.png" width="100%" alt="DeepSeek Harness composer with the Quick Replies bar: chips such as continue, plus and manage buttons, and the message input">
@@ -43,7 +43,7 @@ Requirements:
 
 - DeepSeek Harness with a Web profile
 - Node.js 20 or newer
-- Verified DSH version: `0.1.5-rc.1` (plugin `0.1.2`)
+- Verified DSH version: `0.1.7-alpha.2` (plugin `0.1.4`)
 
 If the `dsh` command is already installed:
 
@@ -74,7 +74,7 @@ pnpm run build
 dsh plugin --profile web add "link:$(pwd)"
 ```
 
-Refresh the web UI after install. The host half registers the settings namespace through `cordis.patch.yml`; the client mounts the bar on `conversation.input.dock`. The library is stored in the `quick-replies` section of `~/.dsh/settings.yaml`, not in the plugin install directory.
+Refresh the web UI after install. The host half declares the reply library as its `Config` — on DSH 0.1.7 that `Config` **is** the `dsh-quick-replies` settings form, because a form namespace is the loader entry id — and the client mounts the bar on `conversation.input.dock`. The library is stored as that entry's `config` in the active profile's `cordis.patch.yml` (`~/.dsh/profiles/<profile>/cordis.patch.yml`), not in the plugin install directory.
 
 ## Usage
 
@@ -88,23 +88,29 @@ Four defaults ship with the plugin and can all be deleted; they are not recreate
 
 ### LAN / non-loopback pages
 
-DSH disables Host settings persistence for any page whose origin is not a loopback authority (the official `dsh-client-ui-settings` README states it plainly: *Non-loopback pages get no durable settings*). `settingsScope` then answers `unavailable` and never sends `settings.describe`, so every settings-backed surface goes inert — this bar showed “Reply library unavailable” when the Web UI was reached from another machine through a LAN bridge such as `dsh-lan-proxy`, `dsh-bridge`, or `dsh-mobile`.
+DSH keeps Host settings persistence disabled for any page whose origin is not a loopback authority (the official `dsh-client-ui-settings` README states it plainly: *Non-loopback pages get no durable settings*). Every entry-addressed settings form (`ctx.configForms.get(id)`, the DSH 0.1.7 successor of the removed `settingsScope`) is then pinned to `memory`, answers `unavailable`, and never sends `settings.describe`, so every settings-backed surface goes inert — this bar showed “Reply library unavailable” when the Web UI was reached from another machine through a LAN bridge such as `dsh-lan-proxy`, `dsh-bridge`, or `dsh-mobile`.
 
-From `0.1.3` the plugin falls back to the SAME public Remote the official settings client speaks (`settings.describe` / `settings.mutate`) and therefore keeps reading and writing the one shared Host namespace `quick-replies`. Reads, edits, import/export and the revision fence behave exactly as they do on a loopback page; a refused write surfaces as a conflict instead of a silent overwrite.
+The plugin falls back to the SAME public Remote the official settings client speaks (`settings.describe` / `settings.mutate`) and therefore keeps reading and writing the one shared Host `dsh-quick-replies` entry. Reads, edits, import/export and the revision fence behave exactly as they do on a loopback page; a refused write surfaces as a conflict instead of a silent overwrite. A loopback page keeps the official form — one shared describe mirror, the official write queue — and pays no extra wire read.
 
-If you want DSH's stock policy instead (a non-loopback page never persists settings), stay on `0.1.2`, or let the bridge declare itself the Host: inject `window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }` into the served HTML before `__DSH_BOOT__`. DSH's `ctx.connection.isLoopback` then reads true and every settings-backed surface — including the Settings pages — comes back. The `dsh-mobile` gateway already does this.
+If you want DSH's stock policy instead (a non-loopback page never persists settings), stay on `0.1.2`, or let the bridge declare itself the Host: inject `window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }` into the served HTML before `__DSH_BOOT__`. DSH's loopback detection then reads true and every settings-backed surface — including the Settings pages — comes back. The `dsh-mobile` gateway already does this.
 
 ## Compatibility
 
-Current release: plugin **`0.1.3`** is verified against DeepSeek Harness **`0.1.5-rc.1`**.
+Current release: plugin **`0.1.4`** is verified against DeepSeek Harness **`0.1.7-alpha.2`**.
 
-| Plugin | Verified DeepSeek Harness |
-| --- | --- |
-| `0.1.0`–`0.1.1` | `0.1.2-rc.1` |
-| `0.1.2` | `0.1.5-rc.1` |
-| `0.1.3` | `0.1.5-rc.1` |
+| Plugin | Verified DeepSeek Harness | Notes |
+| --- | --- | --- |
+| `0.1.0`–`0.1.1` | `0.1.2-rc.1` | published |
+| `0.1.2` | `0.1.5-rc.1` | published |
+| `0.1.3` | `0.1.5-rc.1` | published; LAN/non-loopback fallback |
+| **`0.1.4`** | `0.1.7-alpha.2` | Adapts to DSH 0.1.7: the library is the plugin's volatile `Config` (a form namespace is the loader entry id), the official client channel is `ctx.configForms`, and `@deepseek-ai/schemastery` is a peer. |
 
-Use `0.1.3` on DSH `0.1.5-rc.1`. Stay on `0.1.1` (or earlier) while still on DSH `0.1.2-rc.1`. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+Use `0.1.4` on DSH `0.1.7-alpha.2`. **`0.1.4` supports DSH `0.1.7-alpha.2` only.** DSH `0.1.7` removed the runtime `ctx.settings.register(...)` API and the `ctx.settingsScope` service this plugin was built on, so `0.1.4` is the only release that stores a library on that line; on an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+
+Two declarations make that work, and a test keeps them honest:
+
+- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0`. The lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` does **not** admit `0.1.7-alpha.2`.
+- `@deepseek-ai/schemastery` is a **peer**, not a plain dependency: DSH 0.1.7 resolves only a linked plugin's peer dependencies from the running installation, so a `link:` install of this directory would otherwise fail to import the Host half.
 
 ## Uninstall
 
@@ -112,7 +118,7 @@ Use `0.1.3` on DSH `0.1.5-rc.1`. Stay on `0.1.1` (or earlier) while still on DSH
 dsh plugin --profile web remove dsh-quick-replies
 ```
 
-Uninstall does not delete the settings library. To wipe it, export JSON from Manage first, then remove the `quick-replies` namespace from settings.
+Uninstall does not delete the settings library. To wipe it, export JSON from Manage first, then remove the `dsh-quick-replies` entry's `config` from the active profile's `cordis.patch.yml`.
 
 ## Development
 
@@ -121,6 +127,8 @@ pnpm install
 pnpm run test
 pnpm run build
 ```
+
+`pnpm run test` runs `tsc --noEmit` plus the vitest projects: shared/host logic, client logic and jsdom UI specs, and a built-artifact lane that loads `lib/index.js` and `lib/client.js` the way the harness does. Run `pnpm run build` before the artifact lane has something to exercise.
 
 Pushing a `v*` tag runs GitHub Actions: tests, pack, optional npm publish when `NPM_TOKEN` is set, and a GitHub Release.
 

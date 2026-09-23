@@ -8,7 +8,7 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 
 // Modules the web shell seeds into the frozen browser module table: client
 // bundles leave these to the injected `require` instead of inlining. (This
-// list mirrors the harness client build baseline for dsh 0.1.5-rc.1.)
+// list mirrors the harness client build baseline for dsh 0.1.7-alpha.2.)
 const PLATFORM_MODULES = [
   'react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/cordis',
   '@deepseek-ai/dsh-client-store',
@@ -40,8 +40,10 @@ const isProductionDependency = (specifier: string): boolean =>
 const NODE_ENV = process.env.NODE_ENV ?? 'production'
 
 export default defineConfig([
-  // Host half: a plain Cordis plugin (ESM). Registers the `quick-replies`
-  // settings namespace when a settings provider is composed; nothing else.
+  // Host half: a plain Cordis plugin (ESM). Exports the reply library's
+  // volatile Config — which IS its settings form on DSH 0.1.7 — and the page
+  // policy that keeps the generic form from duplicating the plugin's own
+  // management dialog; nothing else.
   {
     name: pkg.name,
     entry: { index: 'src/host/index.ts' },

@@ -1,10 +1,11 @@
 /**
  * dsh-quick-replies — settings channel specs.
  *
- * Locks the LAN fix: on a non-loopback page DSH's official `settingsScope` is
- * deliberately `unavailable` (documented "Non-loopback pages get no durable
- * settings"), and the library must still reach its ONE source of truth — the
- * Host `quick-replies` namespace — through the direct channel.
+ * Locks the LAN fix: on a non-loopback page DSH keeps Host persistence off
+ * (`ctx.configForms` is pinned to `memory` and is deliberately `unavailable`,
+ * the documented "Non-loopback pages get no durable settings"), and the library
+ * must still reach its ONE source of truth — the Host `dsh-quick-replies`
+ * settings entry — through the direct channel.
  */
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -24,9 +25,10 @@ import type {
   SettingsScopeLike,
   SettingsScopeSnapshotLike,
 } from '../../src/client/settings/scopeFaces.ts'
+import { QR_NAMESPACE } from '../../src/shared/limits.ts'
 import type { QuickReplySettings } from '../../src/shared/types.ts'
 
-const NS = 'quick-replies'
+const NS = QR_NAMESPACE
 
 interface Row {
   ns: string
@@ -97,7 +99,7 @@ function makeRemote(initial: { writable?: boolean; rows?: Row[] } = {}) {
   }
 }
 
-/** Fake official settings scope (the shape `settingsScope.bind()` answers with). */
+/** Fake official settings form (the shape `ctx.configForms.get(id)` answers with). */
 function makeOfficial(initial: Partial<SettingsScopeSnapshotLike> = {}) {
   const snap: SettingsScopeSnapshotLike = {
     status: 'loading',
