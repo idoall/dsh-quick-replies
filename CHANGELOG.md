@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.6 — 2026-09-25
+
+Verified DeepSeek Harness: `0.1.7-rc.2`（官方最新的候选版本），同时兼容 `0.1.7-rc.1` 与 `0.1.7-alpha.2`。
+
+**本版确认并声明对最新 `0.1.7-rc.2` 候选版本的支持。代码与 `0.1.5` 完全相同，存储模型也完全相同——从 `0.1.5` 升级无需迁移数据、无需改配置。**
+
+- **逐包核对了 rc.1 → rc.2 的实际产物**，本插件依赖的接口都没有不兼容变更：`@deepseek-ai/dsh-settings` 的 `lib` 未变（仍无运行时 `register`，仍是 `describe` / `update` / `replace` / `mutate`）；`@deepseek-ai/dsh-client-ui-settings` 的 `lib/client.js` 未变（`ctx.configForms` 仍在，`ctx.settingsScope` 仍不存在）；`@deepseek-ai/dsh-api-settings-controller` 除 `package.json`/README 外完全一致（`settings.describe` / `settings.mutate` 未变）；`@deepseek-ai/dsh-client-connection` 的 `lib` 未变；`@deepseek-ai/dsh-api-remotes` 只有增量（新增 `schedule` 等 Remote 与凭据事件，局域网兜底依赖的 `settings/document-updated` 仍在）；`@deepseek-ai/dsh-api-session-controller` 的 `prompt` / `steer` / `queue` 面未变（仅新增 `initializeDefaultModel`）。
+- **插槽契约未变**：`conversation.input.dock` 仍是 `kind: "list"`、`scope: "session"`，`quick-replies` occupant 照常注册；该插槽的 props 类型 rc.2 未改（rc.2 只在别处新增了 `stopShortcut` hook）。
+- **rc.2 唯一可见的改动是设计令牌**：`@deepseek-ai/dsh-client-ui-theme` 定义 `--dsw-radius-*`（`sm/md/lg/xl/panel`）与 `--dsw-focus-ring-*`，宿主自己的 dock 面板圆角由字面 `12px` 改为 `var(--dsw-radius-lg)`（= 16px）。本插件的圆角是自持的 12px，因此与刷新后的宿主 dock 有约 4px 的观感差异；本版**刻意不改**——同一个 `--dsw-radius-lg` 在 rc.1 上也是 16px，而 rc.1 的宿主 dock 是 12px，跟随令牌只会把差异从最新版挪到旧版，属于纯观感取舍，不影响挂载、发送与存储。
+- **peer 范围无需改动**：`>=0.1.7-alpha.2 <0.2.0` 在 node-semver 默认预发布规则下同时接纳 `0.1.7-alpha.2`、`0.1.7-rc.1` 与 `0.1.7-rc.2`（只要范围里有比较符写了同一个 `major.minor.patch`，该版本的预发布即被接纳）。`dsh.compatibility.dshReleases` 现同时记录三者。
+- **文档**：中英文 README 在顶部与兼容性章节更新支持版本；顺带修正 README 中「配置了 `NPM_TOKEN` 才发布 npm」的过时说法——实际是 OIDC 可信发布。
+
 ## 0.1.5 — 2026-09-23
 
 Verified DeepSeek Harness: `0.1.7-rc.1`（官方最新的候选版本），同时兼容 `0.1.7-alpha.2`。
