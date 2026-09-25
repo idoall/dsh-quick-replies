@@ -20,7 +20,7 @@
 
 > DSH Quick Replies 是 DeepSeek Harness 社区插件，挂在当前会话输入区上方，不修改 DSH 源码。
 >
-> **✅ 已支持 DSH `0.1.7-rc.1` —— 最新的 `0.1.7` 候选版本（RC）。** 已在运行中的 RC 实例上实测通过，同时也兼容 `0.1.7-alpha.2`；详见[兼容性](#兼容性)。
+> **✅ 已支持 DSH `0.1.7-rc.2` —— 最新的 `0.1.7` 候选版本（RC）。** 已在运行中的 RC 实例上确认插件加载与设置表单注册，同时也兼容 `0.1.7-rc.1` 与 `0.1.7-alpha.2`；详见[兼容性](#兼容性)。
 
 在输入框上方显示一排快捷文本。点击后作为普通用户消息发送：会话空闲时进入队列（`queue`），顶层会话运行中则走 steer（下一步安全边界处理）。不改草稿、不 cancel、不 stop。
 
@@ -45,7 +45,7 @@
 
 - 带 Web profile 的 DeepSeek Harness
 - Node.js 20 或更新版本
-- 已验证的 DSH 版本：`0.1.7-rc.1`（最新候选版）与 `0.1.7-alpha.2`——插件 `0.1.5`
+- 已验证的 DSH 版本：`0.1.7-rc.2`（最新候选版），以及 `0.1.7-rc.1` 与 `0.1.7-alpha.2`——插件 `0.1.6`
 
 已经安装 `dsh` 命令：
 
@@ -98,7 +98,7 @@ DSH 对来源不是 loopback（`localhost` / `127.0.0.1`）的页面会关闭 Ho
 
 ## 兼容性
 
-当前发布：插件 **`0.1.5`** 已针对 DeepSeek Harness **`0.1.7-rc.1`**（最新的 `0.1.7` 候选版本）与 **`0.1.7-alpha.2`** 验证。
+当前发布：插件 **`0.1.6`** 已针对 DeepSeek Harness **`0.1.7-rc.2`**（最新的 `0.1.7` 候选版本）与 **`0.1.7-rc.1`**、**`0.1.7-alpha.2`** 验证。
 
 | 插件 | 验证过的 DeepSeek Harness | 说明 |
 | --- | --- | --- |
@@ -106,13 +106,14 @@ DSH 对来源不是 loopback（`localhost` / `127.0.0.1`）的页面会关闭 Ho
 | `0.1.2` | `0.1.5-rc.1` | 已发布 |
 | `0.1.3` | `0.1.5-rc.1` | 已发布；局域网/非回环兜底 |
 | `0.1.4` | `0.1.7-alpha.2` | 已发布；0.1.7 线上的首个版本 |
-| **`0.1.5`** | **`0.1.7-rc.1`**（最新 RC）、`0.1.7-alpha.2` | **已支持最新的 `0.1.7` 候选版本。** 存储模型与 `0.1.4` 相同，升级无需迁移数据。 |
+| `0.1.5` | `0.1.7-rc.1`、`0.1.7-alpha.2` | 已发布；0.1.7 线上的首个候选版本 |
+| **`0.1.6`** | **`0.1.7-rc.2`**（最新 RC）、`0.1.7-rc.1`、`0.1.7-alpha.2` | **已支持最新的 `0.1.7` 候选版本。** 代码与存储模型和 `0.1.5` 相同，升级无需迁移数据。 |
 
-**`0.1.5` 支持 DSH `0.1.7-rc.1`，即最新的候选版本（RC）。** `0.1.7` 线移除了本插件赖以工作的运行时 `ctx.settings.register(...)` API 与 `ctx.settingsScope` 服务，而**`0.1.4` 已经完成了适配**——`0.1.5` 确认同一份代码在 RC 上原样可用，并顺手清掉了此前遗留的小问题（一个已无调用方的 Host 校验辅助函数，以及两处仍写着 0.1.7 之前旧命名空间 `quick-replies` 的用户可见错误前缀）。**从 `0.1.4` 升级无需迁移数据、也无需改配置。** 仍在更早的 DSH（含 `0.1.6-alpha.2`）上时，请继续使用插件 **`0.1.3`**。更高 DSH 版本不会被自动宣称为兼容。不兼容时禁用或卸载插件，不要给 DSH 核心打补丁。
+**`0.1.6` 支持 DSH `0.1.7-rc.2`，即最新的候选版本（RC）。** 本插件依赖的接口都没有不兼容变更：`conversation.input.dock` 仍承载 `quick-replies` occupant，其 props 契约未变；官方设置通道仍是 `ctx.configForms`（`ctx.settingsScope` 仍不存在）；`@deepseek-ai/dsh-settings` 仍暴露 `describe` / `update` / `replace` / `mutate`，且仍**没有**运行时 `register`；局域网兜底依赖的 `settings/document-updated` 事件仍在；会话 `prompt(content, mode)` 签名未变。rc.2 自身的客户端改动是增量的（新增 `schedule` 等 Remote、更多凭据事件），外加一次设计令牌改造（`--dsw-radius-*`、`--dsw-focus-ring-*`），只改了宿主自身 dock 的观感，既没有移动插槽也没有改动 props。**从 `0.1.5` 升级无需迁移数据、也无需改配置。** 仍在更早的 DSH（含 `0.1.6-alpha.2`）上时，请继续使用插件 **`0.1.3`**。更高 DSH 版本不会被自动宣称为兼容。不兼容时禁用或卸载插件，不要给 DSH 核心打补丁。
 
 有两处声明支撑这一点，并由测试守住：
 
-- `dsh.engines.dsh` 与 `peerDependencies['@deepseek-ai/dsh-settings']` 都声明 `>=0.1.7-alpha.2 <0.2.0`，该范围同时接纳 `0.1.7-alpha.2` 与 `0.1.7-rc.1`（只要范围里有比较符写了同一个 `major.minor.patch`，该版本的预发布就会被接纳）。下界特意写成这个 alpha：按 node-semver 默认的预发布规则，`>=0.1.6-0 <0.2.0` 这样的范围**两者都不接纳**。
+- `dsh.engines.dsh` 与 `peerDependencies['@deepseek-ai/dsh-settings']` 都声明 `>=0.1.7-alpha.2 <0.2.0`，该范围同时接纳 `0.1.7-alpha.2`、`0.1.7-rc.1` 与 `0.1.7-rc.2`（只要范围里有比较符写了同一个 `major.minor.patch`，该版本的预发布就会被接纳）。下界特意写成这个 alpha：按 node-semver 默认的预发布规则，`>=0.1.6-0 <0.2.0` 这样的范围**三者都不接纳**。
 - `@deepseek-ai/schemastery` 是 **peer**，不是普通依赖：DSH 0.1.7 只从运行安装解析 link 插件的 peer 依赖，否则 `link:` 安装会连 Host 半边都 import 失败。
 
 ## 卸载
@@ -133,6 +134,6 @@ pnpm run build
 
 `pnpm run test` 会跑 `tsc --noEmit` 以及全部 vitest 项目：共享/Host 逻辑、客户端逻辑与 jsdom UI 用例，还有一条会按 DSH 的方式加载 `lib/index.js`、`lib/client.js` 的构建产物用例。产物用例需要有东西可跑，所以先执行一次 `pnpm run build`。
 
-推送 `v*` 标签后，GitHub Actions 会跑测试、打包，并在配置了 `NPM_TOKEN` 时发布到 npm、创建 GitHub Release。
+推送 `v*` 标签后，GitHub Actions 会跑版本/发版说明门禁、测试、打包，通过 npm 可信发布（OIDC，不需要 `NPM_TOKEN`）发布，并用 `docs/releases/<tag>.md` 创建 GitHub Release。
 
 MIT，详见 [LICENSE](LICENSE)。
