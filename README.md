@@ -45,7 +45,7 @@ Requirements:
 
 - DeepSeek Harness with a Web profile
 - Node.js 20 or newer
-- Verified DSH version: `0.1.7-rc.2` (the latest release candidate), plus `0.1.7-rc.1` and `0.1.7-alpha.2` — plugin `0.1.6`
+- Verified DSH version: `0.2.0-rc.1`, plus the whole `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`) — plugin `0.1.7`
 
 If the `dsh` command is already installed:
 
@@ -98,7 +98,7 @@ If you want DSH's stock policy instead (a non-loopback page never persists setti
 
 ## Compatibility
 
-Current release: plugin **`0.1.6`** is verified against DeepSeek Harness **`0.1.7-rc.2`** — the latest `0.1.7` release candidate — and against `0.1.7-rc.1` and `0.1.7-alpha.2`.
+Current release: plugin **`0.1.7`** is verified against DeepSeek Harness **`0.2.0-rc.1`** (released 2026-09-28) and against the whole `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | Verified DeepSeek Harness | Notes |
 | --- | --- | --- |
@@ -107,13 +107,14 @@ Current release: plugin **`0.1.6`** is verified against DeepSeek Harness **`0.1.
 | `0.1.3` | `0.1.5-rc.1` | published; LAN/non-loopback fallback |
 | `0.1.4` | `0.1.7-alpha.2` | published; first release on the 0.1.7 line |
 | `0.1.5` | `0.1.7-rc.1`, `0.1.7-alpha.2` | published; first release candidate on the 0.1.7 line |
-| **`0.1.6`** | **`0.1.7-rc.2`** (latest RC), `0.1.7-rc.1`, `0.1.7-alpha.2` | **Supports the newest `0.1.7` release candidate.** Same code and storage model as `0.1.5`; upgrading needs no data migration. |
+| `0.1.6` | `0.1.7-rc.2` (latest 0.1.7 RC), `0.1.7-rc.1`, `0.1.7-alpha.2` | published |
+| **`0.1.7`** | **`0.2.0-rc.1`** (latest), the whole `0.1.7` line | **Supports DSH 0.2.0-rc.1.** Same code and storage model as `0.1.5`+; upgrading needs no data migration. |
 
-**`0.1.6` supports DSH `0.1.7-rc.2`, the latest release candidate.** Nothing this plugin consumes changed incompatibly: `conversation.input.dock` still carries the `quick-replies` occupant and its props contract is untouched, `ctx.configForms` is still the official settings channel (`ctx.settingsScope` is still gone), `@deepseek-ai/dsh-settings` still exposes `describe` / `update` / `replace` / `mutate` and still has **no** runtime `register`, `settings/document-updated` is still published for the LAN fallback, and the session `prompt(content, mode)` signature is unchanged. rc.2's own client changes are additive (new remotes such as `schedule`, extra credential events) plus a design-token pass (`--dsw-radius-*`, `--dsw-focus-ring-*`) that restyles the host's own docks without moving the slot or its props. **Upgrading from `0.1.5` needs no data migration and no config change.** On an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+**`0.1.7` supports DSH `0.2.0-rc.1`.** Nothing this plugin consumes changed incompatibly between `0.1.7-rc.2` and `0.2.0-rc.1`: `conversation.input.dock` still carries the `quick-replies` occupant (`kind: "list"`, `scope: "session"`, owner `InputZone`) with its props contract untouched; the client static module table still matches this plugin's nine platform modules one for one and the `window.__ModuleLoader__` registration protocol is unchanged; `ctx.configForms` is still the official settings channel (`ctx.settingsScope` is still gone); `@deepseek-ai/dsh-settings` still exposes `describe` / `update` / `replace` / `mutate` and still has **no** runtime `register` (this repo's typecheck now runs directly against the `0.2.0-rc.1` package); `settings/document-updated` is still published for the LAN fallback; and the session `prompt(content, mode)` signature is unchanged. 0.2.0-rc.1's plugin-facing change is the profile-loading peer gate, which this plugin passes (`dsh --profile web --dump-config` loads it with no skipping warning). **Upgrading from `0.1.6` (or `0.1.5`) needs no data migration and no config change.** On an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
 
 Two declarations make that work, and a test keeps them honest:
 
-- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0`, which admits `0.1.7-alpha.2`, `0.1.7-rc.1` and `0.1.7-rc.2` (a prerelease is admitted when some comparator names the same `major.minor.patch`). The lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` would admit **none** of them.
+- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || >=0.2.0 <0.3.0`. The first alternative admits `0.1.7-alpha.2`, `0.1.7-rc.1` and `0.1.7-rc.2` (a prerelease is admitted when some comparator names the same `major.minor.patch`); the lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` would admit **none** of them. The middle term explicitly admits the verified `0.2.0-rc.1` — the previous `<0.2.0` upper bound did **not** admit it under the default prerelease rule (no comparator names the `0.2.0` tuple); the DSH gate still passed it only because it checks with `includePrerelease: true`. The upper bound uses `-0` so other `0.2.0` prereleases (e.g. `0.2.0-rc.2`) stay out until verified, while future `0.2.x` stable releases are admitted.
 - `@deepseek-ai/schemastery` is a **peer**, not a plain dependency: DSH 0.1.7 resolves only a linked plugin's peer dependencies from the running installation, so a `link:` install of this directory would otherwise fail to import the Host half.
 
 ## Uninstall
