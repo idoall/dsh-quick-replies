@@ -1,6 +1,6 @@
 {
   "name": "dsh-quick-replies",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "DSH web plugin: manageable quick-reply text chips in the current session input area; one tap sends the stored text as an ordinary user message (queue while idle, steer when the top-level session runs). Independent source, user data and DSH install stay separate for easy upgrade recovery.",
   "type": "module",
   "main": "lib/index.js",
@@ -50,7 +50,7 @@
   "dsh": {
     "manifestVersion": 1,
     "engines": {
-      "dsh": ">=0.1.7-alpha.2 <0.2.0"
+      "dsh": ">=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || >=0.2.0 <0.3.0"
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -67,6 +67,7 @@
     },
     "compatibility": {
       "dshReleases": {
+        "0.2.0-rc.1": "compatible",
         "0.1.7-rc.2": "compatible",
         "0.1.7-rc.1": "compatible",
         "0.1.7-alpha.2": "compatible"
@@ -84,12 +85,12 @@
   "license": "MIT",
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.4",
-    "@deepseek-ai/dsh-settings": ">=0.1.7-alpha.2 <0.2.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || >=0.2.0 <0.3.0",
     "@deepseek-ai/schemastery": "^3.18.4"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.4",
-    "@deepseek-ai/dsh-settings": "0.1.7-alpha.2",
+    "@deepseek-ai/dsh-settings": "0.2.0-rc.1",
     "@deepseek-ai/schemastery": "^3.18.4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",

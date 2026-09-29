@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.7 — 2026-09-29
+
+Verified DeepSeek Harness: `0.2.0-rc.1`（2026-09-28 发布），同时保持对 `0.1.7-rc.2` / `0.1.7-rc.1` / `0.1.7-alpha.2` 的兼容声明。
+
+**本版适配 DSH `0.2.0-rc.1`：运行时接口对本插件零破坏，代码与 `0.1.6` 完全相同——从 `0.1.6` 升级无需迁移数据、无需改配置。改动只有版本声明与文档。**
+
+- **逐项核对了 0.2.0-rc.1 的实际产物与源码**，本插件依赖的接口都没有不兼容变更：
+  - `conversation.input.dock` 插槽仍是 `kind: "list"`、`scope: "session"`、owner `InputZone`（`ui-conversation` 的 `contract/slots.ts`）；
+  - 客户端静态模块表（`packages/client/web/src/seed.ts`）与本插件 `tsdown.config.ts` 的 9 个平台模块逐一对应（react / react-dom / cordis / client-store / ui-slots / ui-primitives / ui-dockkit 等），`window.__ModuleLoader__` 注册协议不变；
+  - `ctx.configForms` 仍是官方设置通道（`ui-settings` 包仍在使用），`@deepseek-ai/dsh-settings` 的 `SettingsNamespace` / `volatile` / `SettingsProvider.configure` 类型契约未变（本仓库 typecheck 直接针对 `0.2.0-rc.1` 通过）；
+  - `settings/document-updated` 事件仍在 settings 包事件表中，局域网兜底不受影响；
+  - 会话 `session.prompt(content, mode, signal, requestId)` 签名未变（`ui-conversation` 的 `service.ts` 仍以相同参数调用）。
+- **profile 门禁实测通过**：`dsh --profile web --dump-config` 中 `dsh-quick-replies` 0.1.6 正常装载，无 skipping 警告（0.2.0-rc.1 起门禁以 `semver.satisfies(..., { includePrerelease: true })` 检查 `@deepseek-ai/dsh-*` peer）。
+- **peer 范围显式声明 0.2 线**。`dsh.engines.dsh` 与 `peerDependencies['@deepseek-ai/dsh-settings']` 从 `>=0.1.7-alpha.2 <0.2.0` 扩为 `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || >=0.2.0 <0.3.0`：旧范围在 node-semver 默认预发布规则下并不接纳 `0.2.0-rc.1`（没有比较符写 `0.2.0` 元组），只是 DSH 门禁的 `includePrerelease` 放行了它；新范围把意图写明——显式接纳已验证的 `0.2.0-rc.1` 与将来的 `0.2.x` 正式版，同时用 `<0.2.0-0` 挡住未经验证的 `0.2.0-rc.2` 等预发布。`0.1.7` 线的接纳行为与之前完全一致（已用 semver 逐版本验证）。
+- **`dsh.compatibility.dshReleases` 记录 `0.2.0-rc.1`**，保留原有三条 `0.1.7` 线记录。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 钉到 `0.2.0-rc.1`**：本仓库类型检查从「等价于 rc.2」升级为「直接针对 0.2.0-rc.1」。98 项测试全部通过。
+
 ## 0.1.6 — 2026-09-25
 
 Verified DeepSeek Harness: `0.1.7-rc.2`（官方最新的候选版本），同时兼容 `0.1.7-rc.1` 与 `0.1.7-alpha.2`。
