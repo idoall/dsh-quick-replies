@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.8 — 2026-09-30
+
+Verified DeepSeek Harness: `0.2.0-rc.2`（2026-09-30 发布；npm dist-tag `next`），同时保持对 `0.2.0-rc.1` 与整条 `0.1.7` 线（`0.1.7-rc.2` / `0.1.7-rc.1` / `0.1.7-alpha.2`）的兼容声明。
+
+**本版适配 DSH `0.2.0-rc.2`：运行时接口对本插件零破坏，业务代码与 `0.1.7` 完全相同——从 `0.1.7` 升级无需迁移数据、无需改配置。改动只有版本声明与文档。同时修掉了 `0.1.7` 在 `rc.2` 上被 profile 门禁拒载（快捷栏消失）的问题。**
+
+- **问题定位：坏掉的是 npm 上的 `latest`，不是 profile 里那份旧版。** `0.1.7` 的 peer 上界 `<0.2.0-0` 是当时刻意用来挡未经验证的 `0.2.0-rc.2` 的；DSH 升到 `0.2.0-rc.2` 后，`0.2.0-rc.2` 既不等于 `0.2.0-rc.1` 也不小于 `0.2.0-0`，`@deepseek-ai/dsh-settings` 这个 peer 判定不满足，整个 bundle 被跳过。而本机 profile 里锁的是 `0.1.6`（范围 `>=0.1.7-alpha.2 <0.2.0`），它的通过**只是因为门禁用 `semver.satisfies(..., { includePrerelease: true })` 比对，该规则下 `<0.2.0` 会接纳 `0.2.0-rc.2`**；换成 node-semver 默认规则同样不接纳。所以任何 `pnpm update` 或新装拿到 `0.1.7` 的用户都会丢插件。
+- **peer 范围显式加入 `0.2.0-rc.2`**。`dsh.engines.dsh` 与 `peerDependencies['@deepseek-ai/dsh-settings']` 改为 `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || 0.2.0-rc.2 || >=0.2.0 <0.3.0`。**新范围的接纳表在 node-semver 默认规则与门禁的 `includePrerelease` 规则下完全一致**——这是相对 `0.1.6`（只在宽松规则下接纳 `rc.2`）与 `0.1.7`（两种规则下都不接纳 `rc.2`）的实质改进，声明终于与事实对齐。`0.2.0-rc.3` 等未验证预发布仍留在门外（`❌/❌`），`0.2.0` 正式版及 `0.2.x` 仍接纳。
+- **用 DSH 自带的门禁函数实测**（`@deepseek-ai/dsh-app-boot` 的 `evaluatePluginCompatibility`，不是复刻逻辑）：`0.1.8` 的 manifest → 通过；npm 上 `0.1.7` 的 manifest → 判定不兼容（复现本次要修的现象）。
+- **rc.1 → rc.2 源码逐项核对，本插件依赖的接口都没有不兼容变更**：`ui-conversation` 的 `contract/` 目录**零 diff**（`conversation.input.dock` 插槽契约不变）；`packages/client/web/src/seed.ts` 的 9 个平台模块表**零 diff**（与 `tsdown.config.ts` 基线一一对应，`window.__ModuleLoader__` 协议不变）；`ctx.configForms` 仍是官方设置通道且 `ui-settings` 的 `src/` 零 diff（`settingsScope` 仍不存在）；`settings/document-updated` 仍在发、仍在事件表里；会话 `prompt(content, mode, signal, requestId)` 的调用点与 `api/session-controller` 的 `src/` 均未变；`api/remotes` 只有增量（新增 `userQuestionsRemote`）。平台基线里唯一实质改动是 `ui-primitives`（`Input` 改 `forwardRef`、新增 `MenuGroup`、一处图标画法微调），本插件客户端半边不 import 这些模块（只用注入的平台 `require`），且 `forwardRef` 化对既有调用方向后兼容。
+- **`dsh.compatibility.dshReleases` 记录 `0.2.0-rc.2`**，保留原有四条记录。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 钉到 `0.2.0-rc.2`**：本仓库类型检查从「直接针对 `0.2.0-rc.1`」升级为「直接针对 `0.2.0-rc.2`」。98 项测试全部通过（含按 harness 方式装载 `lib/` 产物的 lane），`pnpm build` 产出三件套。
+- **本次未做端到端装载实测**：`dsh --profile web --dump-config` 看到本条目无 skipping、快捷栏真的渲染出来，需要 profile（`~/.dsh`）里装到 `0.1.8` 之后才能做，改动 `~/.dsh` 不在本仓库范围内；上面那条门禁实测用的是 DSH 自己的判定函数，结论等价。`docs/releases/v0.1.8.md` 里对此有明确标注。
+
 ## 0.1.7 — 2026-09-29
 
 Verified DeepSeek Harness: `0.2.0-rc.1`（2026-09-28 发布），同时保持对 `0.1.7-rc.2` / `0.1.7-rc.1` / `0.1.7-alpha.2` 的兼容声明。

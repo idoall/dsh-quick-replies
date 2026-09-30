@@ -20,7 +20,7 @@
 
 > DSH Quick Replies is a DeepSeek Harness community plugin. It mounts above the current session composer and does not modify DSH source.
 >
-> **✅ Supports DSH `0.1.7-rc.2` — the latest `0.1.7` release candidate.** Confirmed on the running release candidate (the plugin loads and its settings form registers) and compatible with `0.1.7-rc.1` and `0.1.7-alpha.2`; see [Compatibility](#compatibility).
+> **✅ Supports DSH `0.2.0-rc.2` — the latest release candidate.** Verified against it and still compatible with `0.2.0-rc.1` and the whole `0.1.7` line; see [Compatibility](#compatibility). On `0.2.0-rc.2` use plugin `0.1.8` or newer — plugin `0.1.7` is skipped by the profile peer gate.
 
 A row of stored text chips sits above the input. A tap sends them as an ordinary user message: `queue` while idle, `steer` when the top-level session is running (handled at the next safe boundary). The plugin never rewrites the draft, never cancels, and never stops work.
 
@@ -45,7 +45,7 @@ Requirements:
 
 - DeepSeek Harness with a Web profile
 - Node.js 20 or newer
-- Verified DSH version: `0.2.0-rc.1`, plus the whole `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`) — plugin `0.1.7`
+- Verified DSH version: `0.2.0-rc.2`, plus `0.2.0-rc.1` and the whole `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`) — plugin `0.1.8`
 
 If the `dsh` command is already installed:
 
@@ -98,7 +98,7 @@ If you want DSH's stock policy instead (a non-loopback page never persists setti
 
 ## Compatibility
 
-Current release: plugin **`0.1.7`** is verified against DeepSeek Harness **`0.2.0-rc.1`** (released 2026-09-28) and against the whole `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
+Current release: plugin **`0.1.8`** is verified against DeepSeek Harness **`0.2.0-rc.2`** (released 2026-09-30), and against `0.2.0-rc.1` plus the whole `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | Verified DeepSeek Harness | Notes |
 | --- | --- | --- |
@@ -107,14 +107,17 @@ Current release: plugin **`0.1.7`** is verified against DeepSeek Harness **`0.2.
 | `0.1.3` | `0.1.5-rc.1` | published; LAN/non-loopback fallback |
 | `0.1.4` | `0.1.7-alpha.2` | published; first release on the 0.1.7 line |
 | `0.1.5` | `0.1.7-rc.1`, `0.1.7-alpha.2` | published; first release candidate on the 0.1.7 line |
-| `0.1.6` | `0.1.7-rc.2` (latest 0.1.7 RC), `0.1.7-rc.1`, `0.1.7-alpha.2` | published |
-| **`0.1.7`** | **`0.2.0-rc.1`** (latest), the whole `0.1.7` line | **Supports DSH 0.2.0-rc.1.** Same code and storage model as `0.1.5`+; upgrading needs no data migration. |
+| `0.1.6` | `0.1.7-rc.2` (latest 0.1.7 RC), `0.1.7-rc.1`, `0.1.7-alpha.2` | published; loads on `0.2.0-rc.2` only through the gate's lenient prerelease rule — prefer `0.1.8` |
+| `0.1.7` | `0.2.0-rc.1`, the whole `0.1.7` line | published; **the peer gate skips it on `0.2.0-rc.2`** — upgrade to `0.1.8` |
+| **`0.1.8`** | **`0.2.0-rc.2`** (latest), `0.2.0-rc.1`, the whole `0.1.7` line | **Supports DSH 0.2.0-rc.2.** Same code and storage model as `0.1.5`+; upgrading needs no data migration. |
 
-**`0.1.7` supports DSH `0.2.0-rc.1`.** Nothing this plugin consumes changed incompatibly between `0.1.7-rc.2` and `0.2.0-rc.1`: `conversation.input.dock` still carries the `quick-replies` occupant (`kind: "list"`, `scope: "session"`, owner `InputZone`) with its props contract untouched; the client static module table still matches this plugin's nine platform modules one for one and the `window.__ModuleLoader__` registration protocol is unchanged; `ctx.configForms` is still the official settings channel (`ctx.settingsScope` is still gone); `@deepseek-ai/dsh-settings` still exposes `describe` / `update` / `replace` / `mutate` and still has **no** runtime `register` (this repo's typecheck now runs directly against the `0.2.0-rc.1` package); `settings/document-updated` is still published for the LAN fallback; and the session `prompt(content, mode)` signature is unchanged. 0.2.0-rc.1's plugin-facing change is the profile-loading peer gate, which this plugin passes (`dsh --profile web --dump-config` loads it with no skipping warning). **Upgrading from `0.1.6` (or `0.1.5`) needs no data migration and no config change.** On an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
+**`0.1.8` supports DSH `0.2.0-rc.2`.** Nothing this plugin consumes changed incompatibly between `0.2.0-rc.1` and `0.2.0-rc.2`: the `conversation.input.dock` slot contract directory is byte-identical, so the `quick-replies` occupant (`kind: "list"`, `scope: "session"`, owner `InputZone`) still registers with its props contract untouched; the client static module table (`packages/client/web/src/seed.ts`) has zero diff and still matches this plugin's nine platform modules one for one, with the `window.__ModuleLoader__` registration protocol unchanged; `ctx.configForms` is still the official settings channel and `ui-settings`' source is unchanged (`ctx.settingsScope` is still gone); `@deepseek-ai/dsh-settings` still exposes `describe` / `update` / `replace` / `mutate` and still has **no** runtime `register` (this repo's typecheck now runs directly against the `0.2.0-rc.2` package); `settings/document-updated` is still emitted for the LAN fallback; and the session `prompt(content, mode, signal, requestId)` signature is unchanged. The only substantive platform-baseline change is in `ui-primitives` (`Input` converted to `forwardRef`, a new `MenuGroup`, one icon path tweak); this plugin's client half never imports those modules — it only uses the injected platform `require` — and a `forwardRef` conversion stays backward compatible for existing callers.
+
+**Why `0.1.7` breaks on `0.2.0-rc.2` — and why the older pin seems fine.** `0.1.7`'s upper bound `<0.2.0-0` was written to keep the untested `0.2.0-rc.2` out; once `rc.2` shipped, that bound became a refusal, because `0.2.0-rc.2` is neither equal to `0.2.0-rc.1` nor less than `0.2.0-0`. The whole bundle is then skipped by the profile gate and the bar disappears. Meanwhile a profile still pinned to `0.1.6` (range `>=0.1.7-alpha.2 <0.2.0`) *does* load — but only because the gate compares with `semver.satisfies(..., { includePrerelease: true })`, and under that rule `<0.2.0` admits `0.2.0-rc.2`; node-semver's default rule rejects it too. So the broken artifact is npm's `latest`, and anyone running `pnpm update` or installing fresh on `0.2.0-rc.2` loses the plugin. Measured with the gate function DSH itself ships (`evaluatePluginCompatibility` from `@deepseek-ai/dsh-app-boot`): the `0.1.8` manifest passes, the `0.1.7` manifest is judged incompatible. **Upgrading from `0.1.7` (or `0.1.6` / `0.1.5`) needs no data migration and no config change.** On an older DSH — including `0.1.6-alpha.2` — stay on plugin **`0.1.3`**. Newer DSH releases are not auto-declared compatible. If incompatible, disable or uninstall the plugin — do not patch DSH core.
 
 Two declarations make that work, and a test keeps them honest:
 
-- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || >=0.2.0 <0.3.0`. The first alternative admits `0.1.7-alpha.2`, `0.1.7-rc.1` and `0.1.7-rc.2` (a prerelease is admitted when some comparator names the same `major.minor.patch`); the lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` would admit **none** of them. The middle term explicitly admits the verified `0.2.0-rc.1` — the previous `<0.2.0` upper bound did **not** admit it under the default prerelease rule (no comparator names the `0.2.0` tuple); the DSH gate still passed it only because it checks with `includePrerelease: true`. The upper bound uses `-0` so other `0.2.0` prereleases (e.g. `0.2.0-rc.2`) stay out until verified, while future `0.2.x` stable releases are admitted.
+- `dsh.engines.dsh` and `peerDependencies['@deepseek-ai/dsh-settings']` both declare `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || 0.2.0-rc.2 || >=0.2.0 <0.3.0`. The first alternative admits `0.1.7-alpha.2`, `0.1.7-rc.1` and `0.1.7-rc.2` (a prerelease is admitted when some comparator names the same `major.minor.patch`); the lower bound names the alpha on purpose — under node-semver's default prerelease rule a range like `>=0.1.6-0 <0.2.0` would admit **none** of them. The two middle terms name the verified `0.2.0-rc.1` and `0.2.0-rc.2` explicitly, so **the admission table is identical under node-semver's default rule and under the gate's `includePrerelease: true` rule** — the declaration states what is actually true no matter which rule reads it. (This is the substantive fix over `0.1.6`, which admitted `rc.2` only under the lenient rule, and over `0.1.7`, which admitted it under neither.) The upper bound uses `-0` so other `0.2.0` prereleases (e.g. `0.2.0-rc.3`) stay out until verified, while future `0.2.x` stable releases are admitted.
 - `@deepseek-ai/schemastery` is a **peer**, not a plain dependency: DSH 0.1.7 resolves only a linked plugin's peer dependencies from the running installation, so a `link:` install of this directory would otherwise fail to import the Host half.
 
 ## Uninstall
