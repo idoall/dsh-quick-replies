@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.9 — 2026-10-08
+
+Verified DeepSeek Harness: `0.2.1-alpha.1`（2026-10-03 发布），同时保持对 `0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+**本版声明支持最新 DSH `0.2.1-alpha.1`：接口零破坏，业务代码与 `0.1.8` 完全相同——升级无需迁移数据、无需改配置。改动只有兼容声明、文档与开发依赖的钉版。同时把两份 README 从「实现说明」重写为「讲重点」，删去三段长篇接口论证。**
+
+- **门禁放行**：用 DSH 自带的门禁函数（`@deepseek-ai/dsh-app-boot` 的 `evaluatePluginCompatibility`）实测 `0.1.8`/`0.1.9` 的 manifest → 通过。`0.1.8` 的范围其实已经能装载 `0.2.1-alpha.1`（尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease: true` 下把排序高于 `0.2.0` 的预发布一并接纳），所以这次不是修 bug，而是把已验证版本写明。
+- **peer 范围显式加入 `0.2.1-alpha.1`**：`dsh.engines.dsh` 与 `peerDependencies['@deepseek-ai/dsh-settings']` 改为 `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-alpha.1 || >=0.2.0 <0.3.0`。加入后 `0.2.1-alpha.1` 在 node-semver 默认规则与门禁的 `includePrerelease` 规则下**都**接纳（此前只靠后者）；`0.2.1-alpha.2` 等后续预发布仍由尾段在门禁侧接纳，`0.2.0`/`0.2.1` 正式版照常接纳，`0.3.0` 仍在大门外。
+- **真实 profile 端到端实测**：`dsh --profile web --dump-config` 退出码 0、**stderr 零 skip 警告**；`dsh-quick-replies` 条目存在且未被禁用，`config.items` 完整呈现用户自定义条目，说明宿主半边被 import 且 schemastery Config 解析成功（profile 里当时装的是 `0.1.8`）。
+- **rc.2 → 0.2.1-alpha.1 源码逐项核对，插件消费的契约全部未变**：`ui-conversation` 的 `contract/slots.ts` 里 `conversation.input.dock` 声明未变（`kind:'list'`、`scope:'session'`、owner `InputZone`）；`packages/client/web/src/seed.ts` 的客户端静态模块表未变，仍与 `tsdown.config.ts` 的 9 个平台模块一一对应；`input/service.ts` 的 `prompt(content, mode, signal, requestId)` 调用点未变；`InputState.phase` 四个取值逐字未变；`SessionInput.state`、`contract/composer-blocks.ts` 的 `storeFor(sessionId)` 未变；`packages/settings/settings` 与 `ui-settings` 只改 README；`settings.configure(presentation, owner)` 两版同在 `settings/src/index.ts:266`；harness 的 `packages/client/tsdown.client.ts` 的 banner/intro/footer 契约未变（只改了一处文档注释），插件 client bundle 的 `window.__ModuleLoader__.load({id, factory})` + `var module = { exports: {} }` 写法仍成立。
+- **本版唯一的破坏性客户端契约改动不影响本插件**：新增草稿文档模型（`DraftSnapshot`/`DraftInput`/`DraftReference`），并把 `ConversationSessionInjected.bindDraftMirror(write:(text)=>void)` 改名为 `bindDraftPersistence(write:(draft: DraftSnapshot)=>void)`、`ConversationStoreState.draft` 由 `string` 变 `DraftInput`——这些都在 session-injected 插槽契约上，而本插件只注册 `conversation.input.dock`、从不改写草稿，公开的 `SessionInput.setDraft(text: string)` 签名也未变。官方另两条「需更新」说明同样不适用：移除运行时 invariant 插件与 `./invariant` 导出（本插件无此入口）、输入区统计拆为 `activity`/`usage`（本插件不注册 `stats` 行）。
+- **样式认领修复（「启停插件时其他插件样式被移除」）对本插件安全**：`modules/src/client/system.ts` 的 `claimStyles` 现在只认领「factory 运行前不存在」的 `style:not([data-plugin])`；本插件 `installStyles()` 自建标签时立即写 `data-plugin`，属预标记，走 `style[data-plugin="<id>"]` 的 owned 路径，新旧行为一致。
+- **文档**：两份 README 重写为短句讲重点（删掉 `0.1.7` 在 `rc.2` 上的长篇归因、逐字节契约论证与规则矩阵），兼容表每行一句话；`docs/releases/v0.1.9.md` 按现行版式写（双语锚点 + 一句话 + 三条要点 + 升级命令）。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 钉到 `0.2.1-alpha.1`**：本仓库类型检查从「直接针对 `0.2.0-rc.2`」升级为「直接针对 `0.2.1-alpha.1`」。98 项测试全部通过（含按 harness 方式装载 `lib/` 产物的 lane）。
+
 ## 0.1.8 — 2026-09-30
 
 Verified DeepSeek Harness: `0.2.0-rc.2`（2026-09-30 发布；npm dist-tag `next`），同时保持对 `0.2.0-rc.1` 与整条 `0.1.7` 线（`0.1.7-rc.2` / `0.1.7-rc.1` / `0.1.7-alpha.2`）的兼容声明。
