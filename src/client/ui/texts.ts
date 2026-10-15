@@ -55,7 +55,6 @@ export function refusalText(refusal: Refusal): string {
 export function storageNoteText(note: StorageNote): string {
   switch (note) {
     case 'ok': return ''
-    case 'memory': return t('storage.note.memory')
     case 'readonly': return t('storage.note.readonly')
     case 'unavailable': return t('storage.note.unavailable')
     case 'unsupported-version': return t('storage.note.unsupported-version')

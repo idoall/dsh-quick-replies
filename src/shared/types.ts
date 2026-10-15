@@ -29,8 +29,7 @@ export interface QuickReplySettings {
 
 /**
  * Storage-state view surfaced to the UI. `unavailable` means the settings entry
- * is not exposed to this client or the connection keeps preferences
- * process-local (memory mode): edits are disabled and the truth is clearly
+ * is not exposed to this client: edits are disabled and the truth is clearly
  * labelled, but a previously confirmed snapshot may still be used for sending.
  */
 export type LibraryStatus = 'loading' | 'ready' | 'unavailable'

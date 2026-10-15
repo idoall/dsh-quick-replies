@@ -4,20 +4,22 @@
  * The library's ONE storage contract is the Host settings entry
  * `dsh-quick-replies`. Two client channels can serve it:
  *
- * 1. the official `ctx.configForms` form (loopback pages) — the DSH 0.1.7
- *    successor of the removed `settingsScope` service, and
- * 2. the direct Host channel (`hostDirectScope.ts`), which exists exactly
- *    because the official form is deliberately inert on a non-loopback page —
- *    the LAN page a phone uses.
+ * 1. the official `ctx.configForms` form (the default on every page) — the DSH
+ *    0.1.7 successor of the removed `settingsScope` service, and
+ * 2. the direct Host channel (`hostDirectScope.ts`), which exists because DSH up
+ *    to `0.2.1-alpha.1` pinned the official form to process-local storage on a
+ *    non-loopback page — the LAN page a phone uses — leaving it terminally
+ *    `unavailable`.
  *
  * This module picks between them without ever guessing:
  *
- * - The official form wins whenever it is not `unavailable`, so a loopback page
+ * - The official form wins whenever it is not `unavailable`, so a normal page
  *   keeps the official semantics (the one shared describe mirror, the official
  *   write queue and revision fences) and pays NO extra wire read.
- * - Only when the official form reports `unavailable` (the documented
- *   non-loopback degradation: it is pinned to `memory` mode there and never
- *   crosses the wire) is the direct channel opened, lazily and once.
+ * - Only when the official form reports `unavailable` is the direct channel
+ *   opened, lazily and once. On `0.2.1-alpha.3` and later that means the Host
+ *   answer carries no row for this namespace, so the direct channel is a
+ *   dormant fallback kept for older DSH.
  * - With neither source the channel stays `loading`, i.e. exactly the state this
  *   plugin had before the direct channel existed.
  */
@@ -31,7 +33,6 @@ const LOADING_SNAPSHOT: SettingsScopeSnapshotLike = Object.freeze({
   user: undefined,
   revision: undefined,
   writable: false,
-  mode: 'host',
 }) as SettingsScopeSnapshotLike
 
 export interface SettingsChannelOptions {
@@ -58,7 +59,6 @@ function sameSnapshot(a: SettingsScopeSnapshotLike, b: SettingsScopeSnapshotLike
   return a.status === b.status
     && a.revision === b.revision
     && a.writable === b.writable
-    && a.mode === b.mode
     && a.value === b.value
     && a.base === b.base
     && a.user === b.user

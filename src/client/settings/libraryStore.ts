@@ -6,7 +6,7 @@
  * FR-08/FR-09):
  *
  * - While the scope is loading, NO sendable (possibly stale or fabricated)
- *   data is exposed. An unavailable/read-only/memory scope disables editing
+ *   data is exposed. An unavailable/read-only scope disables editing
  *   with a truthful reason. A scope that turns bad (hand-edited document,
  *   unknown future schema version) keeps the last confirmed good snapshot for
  *   sending but shows the storage problem — it never silently falls back.
@@ -24,7 +24,6 @@ import type { SettingsPathOpLike, SettingsScopeLike } from './scopeFaces.ts'
 
 export type StorageNote =
   | 'ok'
-  | 'memory'
   | 'readonly'
   | 'unavailable'
   | 'unsupported-version'
@@ -39,7 +38,7 @@ export interface LibraryState {
   lastGoodItems: QuickReply[]
   /** Truthful storage diagnosis. */
   note: StorageNote
-  /** Editing disabled: memory/read-only/unavailable/unsupported/invalid. */
+  /** Editing disabled: read-only/unavailable/unsupported/invalid. */
   editable: boolean
   /** Namespace revision the UI should fence its next write with. */
   revision: number | undefined
@@ -74,10 +73,8 @@ function stateOf(scope: SettingsScopeLike): LibraryState {
     return { status: 'unavailable', items: [], lastGoodItems: [], note: 'unavailable', editable: false, revision: snap.revision }
   }
 
-  const writable = snap.writable === true && snap.mode !== 'memory'
-  const note: StorageNote = !writable
-    ? (snap.mode === 'memory' ? 'memory' : 'readonly')
-    : 'ok'
+  const writable = snap.writable === true
+  const note: StorageNote = writable ? 'ok' : 'readonly'
 
   const judged = judgeSection(snap.value)
   if (judged.kind === 'ok') {
@@ -109,7 +106,6 @@ export function libraryStateOf(snap: {
   status: 'loading' | 'ready' | 'unavailable'
   value: unknown
   writable: boolean
-  mode: 'host' | 'memory'
   revision: number | undefined
 }): LibraryState {
   const fake = {

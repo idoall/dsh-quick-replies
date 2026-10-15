@@ -1,11 +1,14 @@
 /**
  * dsh-quick-replies — settings channel specs.
  *
- * Locks the LAN fix: on a non-loopback page DSH keeps Host persistence off
- * (`ctx.configForms` is pinned to `memory` and is deliberately `unavailable`,
- * the documented "Non-loopback pages get no durable settings"), and the library
- * must still reach its ONE source of truth — the Host `dsh-quick-replies`
- * settings entry — through the direct channel.
+ * Locks the LAN fix: on DSH up to `0.2.1-alpha.1` a non-loopback page kept Host
+ * persistence off (`ctx.configForms` was pinned to process-local storage and
+ * answered a deliberate `unavailable`, the documented "Non-loopback pages get no
+ * durable settings"), and the library must still reach its ONE source of truth —
+ * the Host `dsh-quick-replies` settings entry — through the direct channel.
+ * `0.2.1-alpha.3` removed that pin, so the same `unavailable` now only means the
+ * Host answer carried no row for the namespace; the selection logic below is
+ * unchanged either way.
  */
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -108,7 +111,6 @@ function makeOfficial(initial: Partial<SettingsScopeSnapshotLike> = {}) {
     user: undefined,
     revision: undefined,
     writable: false,
-    mode: 'host',
     ...initial,
   }
   const listeners = new Set<() => void>()
@@ -148,7 +150,6 @@ describe('hostDirectScope (non-loopback Host settings channel)', () => {
       user: { items: [item('a')] },
       revision: 7,
       writable: true,
-      mode: 'host',
     })
     expect(remote.describeCalls).toHaveLength(1)
   })
@@ -157,7 +158,7 @@ describe('hostDirectScope (non-loopback Host settings channel)', () => {
     const remote = makeRemote({ writable: false, rows: [{ ns: 'other', value: {}, revision: 3 }] })
     const scope = createHostDirectScope(remote.remote, NS)
     await scope.load()
-    expect(scope.getSnapshot()).toMatchObject({ status: 'unavailable', value: undefined, writable: false, mode: 'host' })
+    expect(scope.getSnapshot()).toMatchObject({ status: 'unavailable', value: undefined, writable: false })
   })
 
   it('a refused read publishes unavailable but NEVER discards a held document', async () => {
@@ -321,18 +322,18 @@ describe('settingsChannel (official scope vs direct Host channel)', () => {
 
   it('falls back to the direct Host channel when the official scope reports unavailable (the LAN page)', async () => {
     const remote = makeRemote({ rows: [{ ns: NS, value: section([item('lan')]), revision: 11 }] })
-    const official = makeOfficial({ status: 'unavailable', writable: false, mode: 'memory' })
+    const official = makeOfficial({ status: 'unavailable', writable: false })
     const channel = createSettingsChannel({ openDirect: () => createHostDirectScope(remote.remote, NS) })
     channel.setOfficial(official.scope)
     // The direct channel is opened lazily and answers asynchronously.
     expect(channel.getSnapshot().status).toBe('loading')
     await flush()
-    expect(channel.getSnapshot()).toMatchObject({ status: 'ready', revision: 11, mode: 'host', writable: true })
+    expect(channel.getSnapshot()).toMatchObject({ status: 'ready', revision: 11, writable: true })
   })
 
   it('opens the direct channel when it appears after the official scope (injection order)', async () => {
     const remote = makeRemote({ rows: [{ ns: NS, value: section([item('late')]), revision: 2 }] })
-    const official = makeOfficial({ status: 'unavailable', mode: 'memory' })
+    const official = makeOfficial({ status: 'unavailable' })
     let available = false
     const channel = createSettingsChannel({ openDirect: () => (available ? createHostDirectScope(remote.remote, NS) : undefined) })
     channel.setOfficial(official.scope)
@@ -341,12 +342,12 @@ describe('settingsChannel (official scope vs direct Host channel)', () => {
     available = true
     channel.refresh()
     await flush()
-    expect(channel.getSnapshot()).toMatchObject({ status: 'ready', mode: 'host' })
+    expect(channel.getSnapshot()).toMatchObject({ status: 'ready' })
   })
 
   it('hands authority back to the official scope once it stops being unavailable', async () => {
     const remote = makeRemote({ rows: [{ ns: NS, value: section([item('direct')]), revision: 5 }] })
-    const official = makeOfficial({ status: 'unavailable', mode: 'memory' })
+    const official = makeOfficial({ status: 'unavailable' })
     const channel = createSettingsChannel({ openDirect: () => createHostDirectScope(remote.remote, NS) })
     channel.setOfficial(official.scope)
     await flush()
@@ -359,7 +360,7 @@ describe('settingsChannel (official scope vs direct Host channel)', () => {
 
   it('routes writes to the active channel and refuses with no channel at all', async () => {
     const remote = makeRemote({ rows: [{ ns: NS, value: section([]), revision: 1 }] })
-    const official = makeOfficial({ status: 'unavailable', mode: 'memory' })
+    const official = makeOfficial({ status: 'unavailable' })
     const channel = createSettingsChannel({ openDirect: () => createHostDirectScope(remote.remote, NS) })
     channel.setOfficial(official.scope)
     await flush()
@@ -374,7 +375,7 @@ describe('settingsChannel (official scope vs direct Host channel)', () => {
 
   it('reload() refreshes the direct channel through the invalidation seam', async () => {
     const remote = makeRemote({ rows: [{ ns: NS, value: section([item('a')]), revision: 1 }] })
-    const official = makeOfficial({ status: 'unavailable', mode: 'memory' })
+    const official = makeOfficial({ status: 'unavailable' })
     const channel = createSettingsChannel({ openDirect: () => createHostDirectScope(remote.remote, NS) })
     channel.setOfficial(official.scope)
     await flush()
@@ -400,7 +401,7 @@ describe('LAN regression: the library is usable on a non-loopback page', () => {
       }],
     })
     // Exactly what DSH answers on a LAN page: an inert, process-local scope.
-    const official = makeOfficial({ status: 'unavailable', writable: false, mode: 'memory' })
+    const official = makeOfficial({ status: 'unavailable', writable: false })
     const channel = createSettingsChannel({ openDirect: () => createHostDirectScope(remote.remote, NS) })
     const library = createLibraryStore()
 
