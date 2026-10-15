@@ -6,7 +6,7 @@
  * the plugin relies on: the projection onto the plugin's own scope contract, the
  * refusal translation the management UI needs (a rejected write must REJECT, not
  * silently succeed), and the channel selection that keeps the LAN fallback
- * reachable when the official form is pinned to `memory`.
+ * reachable when the official form reports `unavailable`.
  */
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -39,7 +39,6 @@ function makeConfigForm(initial: Partial<ConfigFormSnapshotLike<unknown>> = {}) 
     user: undefined,
     revision: undefined,
     writable: false,
-    mode: 'host',
     ...initial,
   }
   const listeners = new Set<() => void>()
@@ -104,7 +103,6 @@ describe('configFormScope (official form projection)', () => {
       user: { items: [item('a')] },
       revision: 9,
       writable: true,
-      mode: 'host',
     })
     const scope = configFormScope(fake.form)
     expect(scope.getSnapshot()).toEqual({
@@ -114,7 +112,6 @@ describe('configFormScope (official form projection)', () => {
       user: { items: [item('a')] },
       revision: 9,
       writable: true,
-      mode: 'host',
     })
   })
 
@@ -131,7 +128,7 @@ describe('configFormScope (official form projection)', () => {
   })
 
   it('passes the caller revision fence through and resolves on acceptance', async () => {
-    const fake = makeConfigForm({ status: 'ready', value: section([]), revision: 4, writable: true, mode: 'host' })
+    const fake = makeConfigForm({ status: 'ready', value: section([]), revision: 4, writable: true })
     const scope = configFormScope(fake.form)
     const ops: SettingsPathOpLike[] = [{ op: 'set', path: ['items'], value: [item('a')] }]
     await expect(scope.mutate(ops, 4)).resolves.toBeUndefined()
@@ -139,7 +136,7 @@ describe('configFormScope (official form projection)', () => {
   })
 
   it('turns a refused write into a conflict rejection', async () => {
-    const fake = makeConfigForm({ status: 'ready', value: section([]), revision: 4, writable: true, mode: 'host' })
+    const fake = makeConfigForm({ status: 'ready', value: section([]), revision: 4, writable: true })
     fake.rejectWrites()
     const scope = configFormScope(fake.form)
     await expect(scope.mutate([{ op: 'set', path: ['items'], value: [] }], 4))
@@ -150,7 +147,7 @@ describe('configFormScope (official form projection)', () => {
   })
 
   it('turns a transport throw into an unreachable rejection that keeps the message', async () => {
-    const fake = makeConfigForm({ status: 'ready', value: section([]), revision: 4, writable: true, mode: 'host' })
+    const fake = makeConfigForm({ status: 'ready', value: section([]), revision: 4, writable: true })
     fake.failWrites(new Error('gateway/transport'))
     const scope = configFormScope(fake.form)
     await scope.mutate([{ op: 'set', path: ['items'], value: [] }], 4).catch((error: SettingsWriteFailure) => {
@@ -170,16 +167,15 @@ describe('channel selection with the official form', () => {
       user: { items: [item('a')] },
       revision: 3,
       writable: true,
-      mode: 'host',
     })
     const openDirect = vi.fn(() => undefined)
     const channel = createSettingsChannel({ openDirect })
     channel.setOfficial(configFormScope(official.form))
     expect(openDirect).not.toHaveBeenCalled()
-    expect(channel.getSnapshot()).toMatchObject({ status: 'ready', revision: 3, mode: 'host' })
+    expect(channel.getSnapshot()).toMatchObject({ status: 'ready', revision: 3 })
   })
 
-  it('falls back to the direct Host channel when the official form is the memory-only non-loopback state', async () => {
+  it('falls back to the direct Host channel when the official form reports unavailable', async () => {
     // `source` is what `openDirect()` would build; the channel only asks once.
     const direct = {
       getSnapshot: (): SettingsScopeSnapshotLike => ({
@@ -189,7 +185,6 @@ describe('channel selection with the official form', () => {
         user: undefined,
         revision: 11,
         writable: true,
-        mode: 'host',
       }),
       subscribe: () => () => {},
       mutate: async () => {},
@@ -197,7 +192,7 @@ describe('channel selection with the official form', () => {
     const openDirect = vi.fn(() => direct)
     const channel = createSettingsChannel({ openDirect })
     channel.setOfficial(configFormScope(makeConfigForm({
-      status: 'unavailable', writable: false, mode: 'memory',
+      status: 'unavailable', writable: false,
     }).form))
     expect(openDirect).toHaveBeenCalledTimes(1)
     expect(channel.getSnapshot()).toMatchObject({ status: 'ready', revision: 11 })
@@ -212,7 +207,6 @@ describe('library store over the official form', () => {
       base: section([]),
       revision: 5,
       writable: true,
-      mode: 'host',
     })
     const library = createLibraryStore()
     const channel = createSettingsChannel({ openDirect: () => undefined })
@@ -233,7 +227,7 @@ describe('library store over the official form', () => {
 
   it('surfaces a refused write instead of pretending the edit landed', async () => {
     const official = makeConfigForm({
-      status: 'ready', value: section([]), revision: 2, writable: true, mode: 'host',
+      status: 'ready', value: section([]), revision: 2, writable: true,
     })
     official.rejectWrites()
     const library = createLibraryStore()

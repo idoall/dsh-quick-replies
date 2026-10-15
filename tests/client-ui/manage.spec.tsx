@@ -48,7 +48,6 @@ function scopeWith(items: QuickReply[]): ScopeHost {
         user: { items: value.items },
         revision,
         writable: true,
-        mode: 'host',
       }),
       subscribe(listener) {
         listeners.add(listener)

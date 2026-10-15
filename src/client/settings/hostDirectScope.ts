@@ -1,15 +1,16 @@
 /**
- * dsh-quick-replies — direct Host settings channel (non-loopback pages).
+ * dsh-quick-replies — direct Host settings channel.
  *
  * WHY THIS EXISTS
  *
- * DSH keeps Host persistence disabled on any page whose location is not a
- * loopback authority: `@deepseek-ai/dsh-client-ui-settings` resolves its
- * persistence mode from `remote.$host.isLoopback` and pins a remote page to
- * `memory`. Every entry-addressed form (`ctx.configForms.get(id)`, the DSH
- * 0.1.7 successor of `settingsScope.bind()`) is then terminally `unavailable`,
- * never sends `settings.describe`, and refuses every write — every row it backs
- * is inert even though Connection authentication covers the API.
+ * DSH up to `0.2.1-alpha.1` kept Host persistence disabled on any page whose
+ * location was not a loopback authority: `@deepseek-ai/dsh-client-ui-settings`
+ * resolved its persistence mode from `remote.$host.isLoopback`, pinned a remote
+ * page to `memory`, and every entry-addressed form (`ctx.configForms.get(id)`,
+ * the DSH 0.1.7 successor of `settingsScope.bind()`) was then terminally
+ * `unavailable` — it never sent `settings.describe` and refused every write, so
+ * every row it backed was inert even though Connection authentication covered
+ * the API.
  *
  * A LAN page is exactly where this bar is used from a phone, so the whole
  * `dsh-quick-replies` library — which lives in the Host settings entry — would
@@ -23,10 +24,13 @@
  * per-browser storage no other device can see.
  *
  * This channel is opened ONLY when the official form reports `unavailable`
- * (see `settingsChannel.ts`), so loopback pages keep the official path and pay
- * no extra wire read. Everything here is guarded: an absent Remote, a refused
- * read, or a malformed answer leaves the library exactly as unavailable as it
- * was before this channel existed.
+ * (see `settingsChannel.ts`), so a page that can use the official path pays no
+ * extra wire read. `0.2.1-alpha.3` removed that client-side pin — the Host never
+ * gated settings by origin — so on current DSH the official form serves
+ * non-loopback pages too and this channel is a dormant fallback, kept for the
+ * older releases this plugin still declares support for. Everything here is
+ * guarded: an absent Remote, a refused read, or a malformed answer leaves the
+ * library exactly as unavailable as it was before this channel existed.
  */
 import type { QuickReplySettings } from '../../shared/types.ts'
 import type { SettingsPathOpLike, SettingsScopeLike, SettingsScopeSnapshotLike } from './scopeFaces.ts'
@@ -162,7 +166,6 @@ function sameSnapshot(a: SettingsScopeSnapshotLike, b: SettingsScopeSnapshotLike
   return a.status === b.status
     && a.revision === b.revision
     && a.writable === b.writable
-    && a.mode === b.mode
     && a.value === b.value
     && a.base === b.base
     && a.user === b.user
@@ -182,7 +185,6 @@ function readySnapshot(
     user: row.user,
     revision: row.revision,
     writable,
-    mode: 'host',
   }
 }
 
@@ -194,7 +196,6 @@ function unavailableSnapshot(writable: boolean): SettingsScopeSnapshotLike {
     user: undefined,
     revision: undefined,
     writable,
-    mode: 'host',
   }
 }
 
@@ -225,7 +226,6 @@ export function createHostDirectScope(remote: SettingsRemoteLike, namespace: str
     user: undefined,
     revision: undefined,
     writable: false,
-    mode: 'host',
   }
   let held: SettingsScopeSnapshotLike | undefined
   let error: string | undefined

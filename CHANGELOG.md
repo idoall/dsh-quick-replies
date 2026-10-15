@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.12 — 2026-10-15
+
+Verified DeepSeek Harness: `0.2.1-alpha.3`（与 `0.1.10` / `0.1.11` 同一目标）。
+
+**清掉设置通道里已经死掉的 `mode` 字段——这正是 `0.1.10` 里明确记为「已知漂移、有意不修」的那一处。行为零变化，只是不再让代码假装存在第二条存储路径。**
+
+- **背景**：DSH `0.2.1-alpha.3` 从 `@deepseek-ai/dsh-client-ui-settings` 的 `ConfigFormSnapshot` 删除了 `mode`（`'host' | 'memory'`），并整体移除客户端「非 loopback ⇒ memory 持久化」概念。本插件 `configFormScope.ts` 仍在投影该字段，运行时恒为 `undefined`：`libraryStore` 的可写判定 `snap.writable === true && snap.mode !== 'memory'` 退化成 `snap.writable === true`（结论本就相同），而 `'memory'` 那条存储提示在 alpha.1 上就已不可达（`stateOf` 被 `status === 'unavailable'` 的提前返回挡住）。
+- **契约**：`SettingsScopeSnapshotLike` 去掉 `mode`；`ConfigFormSnapshotLike` 与 `configFormScope` 的投影同步去掉；模块注释改为按 `status` 说明通道选择，并写明 `mode` 已被上游在 alpha.3 删除。
+- **两个通道**：`settingsChannel` 的 `LOADING_SNAPSHOT` 与 `hostDirectScope` 的三个快照构造去掉 `mode: 'host'`；两处 `sameSnapshot` 去掉 `a.mode === b.mode`（该字段对官方通道恒 `undefined`、对直连通道恒 `'host'`，从不参与有效比较）。`hostDirectScope` 的模块注释同时把「DSH 对任何非 loopback 页面关闭 Host 持久化」限定为 `0.2.1-alpha.1` 及更早，并说明 alpha.3 起该通道是休眠回退。
+- **存储层与 UI**：`StorageNote` 去掉 `'memory'`；`stateOf` 的可写判定与提示简化为 `writable === true` 与 `writable ? 'ok' : 'readonly'`；`libraryStateOf` 入参类型去掉 `mode`；`i18n.ts` 删除 `storage.note.memory` 中英文案；`texts.ts` 删除对应 `case`；`shared/types.ts` 的 `LibraryStatus` 注释去掉「memory mode」措辞。
+- **测试**：`library.spec.ts` 的「memory mode is read-only…」改名为「a non-writable scope is read-only…」，断言从 `note === 'memory'` 改为 `'readonly'`（这条现在覆盖的是设置不可写的真实路径）；`makeScope` 辅助函数去掉 `mode` 入参与默认值；`configFormScope.spec.ts` / `settingsChannel.spec.ts` / `dock.spec.tsx` / `manage.spec.tsx` 的全部 `mode` 夹具与断言删除，两处测试名与头注释去掉「memory-only / pinned to memory」措辞。测试数仍是 **98 项全通过**——没有丢掉覆盖，只是同一条用例换了更准确的名字。
+- **验证**：`pnpm run verify` 全绿（两个 tsc + 98 测试 + build + pack dry-run）；产出的 `lib/client.js` 已不含 `storage.note.memory`。
+
 ## 0.1.11 — 2026-10-15
 
 Verified DeepSeek Harness: `0.2.1-alpha.3`（与 `0.1.10` 同一目标；本次只改文档）。

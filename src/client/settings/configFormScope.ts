@@ -6,19 +6,21 @@
  * `settings.describe` mirror per browser, plus a per-entry write queue, reached
  * as `ctx.configForms.get(entryId)` for the entry the plugin's Host half owns.
  * That form already answers the exact facts the plugin's own scope contract
- * needs — status, value, base, user, revision, writable, mode — so this module
- * only projects it onto {@link SettingsScopeLike} and leaves the existing
- * channel selection (`settingsChannel.ts`) in charge of the LAN fallback.
+ * needs — status, value, base, user, revision, writable — so this module only
+ * projects it onto {@link SettingsScopeLike} and leaves the existing channel
+ * selection (`settingsChannel.ts`) in charge of the LAN fallback.
  *
- * Two deliberate translations:
+ * One deliberate translation:
  *
  * - A refused write (`mutate` answers `false`) becomes a REJECTION. The
  *   management UI must surface a conflict instead of pretending the edit
  *   landed, which is the same contract the direct Host channel already obeys.
- * - `mode` is what separates the two pages: DSH fixes it to `memory` on a
- *   non-loopback page, where the form is terminally `unavailable` and never
- *   writes — exactly the state that hands the library to the direct Host
- *   Remote so a phone still sees one shared library.
+ *
+ * DSH `0.2.1-alpha.3` removed the `mode` member this projection used to carry
+ * (`'host' | 'memory'`, `memory` naming a non-loopback page the client pinned
+ * to process-local storage). Nothing read it but the projection itself: the
+ * channel has always selected on `status`, which is also how a
+ * `0.2.1-alpha.3` form reports a namespace the Host does not serve.
  *
  * The service is deliberately read structurally: the client bundle purity gate
  * forbids cross-plugin value imports, and the runtime object belongs to the
@@ -35,7 +37,6 @@ export interface ConfigFormSnapshotLike<T> {
   user: unknown
   revision: number | undefined
   writable: boolean
-  mode: 'host' | 'memory'
 }
 
 /** The subset of `ConfigForm<T>` this adapter reads. */
@@ -91,7 +92,6 @@ export function configFormScope(form: ConfigFormLike): SettingsScopeLike {
         user: snapshot.user,
         revision: snapshot.revision,
         writable: snapshot.writable,
-        mode: snapshot.mode,
       }
     },
     subscribe(listener) {

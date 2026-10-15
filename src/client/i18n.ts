@@ -93,7 +93,6 @@ export const dict: Record<string, Entry> = {
   'import.back': { zh: '返回', en: 'Back' },
   'export.label': { zh: '导出 JSON', en: 'Export JSON' },
   'export.done': { zh: '已导出 {n} 条', en: 'Exported {n} replies' },
-  'storage.note.memory': { zh: '只读（当前浏览器为内存模式，无法持久化）', en: 'Read-only — this browser is in memory mode and cannot persist' },
   'storage.note.readonly': { zh: '只读（设置不可写）', en: 'Read-only (settings are not writable)' },
   'storage.note.unavailable': { zh: '设置服务不可用', en: 'Settings service unavailable' },
   'storage.note.unsupported-version': { zh: '库版本过新，仅可查看（只读）', en: 'Library schema version is newer — read-only' },

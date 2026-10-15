@@ -9,7 +9,6 @@ function makeScope(initial: {
   status?: 'loading' | 'ready' | 'unavailable'
   value?: unknown
   writable?: boolean
-  mode?: 'host' | 'memory'
   revision?: number
 } = {}) {
   const snap: SettingsScopeSnapshotLike = {
@@ -19,7 +18,6 @@ function makeScope(initial: {
     user: initial.value === undefined ? undefined : { items: (initial.value as { items?: unknown }).items },
     revision: initial.revision,
     writable: initial.writable ?? true,
-    mode: initial.mode ?? 'host',
   }
   const listeners = new Set<() => void>()
   const calls: Array<{ ops: readonly SettingsPathOpLike[]; expectedRevision?: number }> = []
@@ -87,14 +85,14 @@ describe('library store', () => {
     expect(state.note).toBe('ok')
   })
 
-  it('memory mode is read-only with a truthful note (never claims persistence)', () => {
-    const scope = makeScope({ value: readyValue([]), mode: 'memory', writable: false, revision: 1 })
+  it('a non-writable scope is read-only with a truthful note (never claims persistence)', () => {
+    const scope = makeScope({ value: readyValue([]), writable: false, revision: 1 })
     const store = createLibraryStore()
     store.attach(scope.scope)
     const state = store.get()
     expect(state.status).toBe('ready')
     expect(state.editable).toBe(false)
-    expect(state.note).toBe('memory')
+    expect(state.note).toBe('readonly')
   })
 
   it('unavailable scope disables everything with the storage note', () => {

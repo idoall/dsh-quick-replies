@@ -9,8 +9,9 @@
  *    form — the DSH 0.1.7 successor of the removed `settingsScope` service —
  *    onto this shape.
  * 2. `hostDirectScope.ts` derives the same shape from the public
- *    `remote.settings` Remote, for the non-loopback pages where the official
- *    form is deliberately inert.
+ *    `remote.settings` Remote, for the pages where the official form is inert
+ *    (DSH up to `0.2.1-alpha.1` pinned every non-loopback page that way; see
+ *    settingsChannel.ts).
  *
  * `settingsChannel.ts` picks between them; the members below are what the
  * library store reads and writes.
@@ -28,9 +29,8 @@ export interface SettingsScopeSnapshotLike {
   user: unknown
   /** Namespace revision fencing the next write. */
   revision: number | undefined
-  /** Whether the Host document accepts writes; memory mode never does. */
+  /** Whether the Host document accepts writes. */
   writable: boolean
-  mode: 'host' | 'memory'
 }
 
 /** One path-addressed settings edit (the wire op shape). */

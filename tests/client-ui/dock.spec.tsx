@@ -34,7 +34,6 @@ function scopeWith(items: QuickReply[], writable = true): { scope: SettingsScope
       user: { items: value.items },
       revision,
       writable,
-      mode: 'host',
     }),
     subscribe(listener) {
       listeners.add(listener)
