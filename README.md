@@ -20,7 +20,7 @@
 
 > A DeepSeek Harness community plugin. It mounts above the session composer and never modifies DSH source.
 >
-> **Supports DSH `0.2.1-alpha.3`.** Verified against it and still compatible with `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.10`.
+> **Supports DSH `0.2.1-alpha.3`.** Verified against it and still compatible with `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.11`.
 
 A row of stored text chips sits above the input. Tapping one sends it as an ordinary user message: queued while the session is idle, steered at the next safe boundary while it runs. The plugin never rewrites your draft, never cancels anything, and never stops work.
 
@@ -84,9 +84,9 @@ Four defaults ship with the plugin and stay deleted if you delete them: continue
 
 ### LAN pages
 
-DSH disables durable Host settings on any page whose origin is not loopback, so settings-backed surfaces go inert — over a LAN bridge (`dsh-lan-proxy`, `dsh-bridge`, `dsh-mobile`) this bar shows “Reply library unavailable”.
+**On DSH up to `0.2.1-alpha.1`** the settings client pinned every non-loopback page to memory mode (`persistence = $host.isLoopback ? "host" : "memory"`), so the official form answered `unavailable` and settings-backed surfaces went inert — over a LAN bridge (`dsh-lan-proxy`, `dsh-bridge`, `dsh-mobile`) this bar showed “Reply library unavailable”. The plugin answers with the same public Remote the official settings client talks to, so reads, edits and import/export keep working against the one shared Host entry, and a refused write shows a conflict rather than silently overwriting.
 
-The plugin falls back to the same public Remote the official settings client talks to, so reads, edits and import/export keep working against the one shared Host entry, and a refused write shows a conflict rather than silently overwriting. Loopback pages keep using the official settings form.
+**`0.2.1-alpha.3` dropped that pin**, and the Host never gated settings by origin, so a non-loopback page now gets the official settings form like a loopback one; the fallback above stays for older DSH and goes unused there.
 
 If you would rather have DSH's stock policy — a non-loopback page never persists settings — stay on plugin `0.1.2`, or let the bridge declare itself the Host by injecting this into the served HTML before `__DSH_BOOT__`:
 
@@ -94,11 +94,11 @@ If you would rather have DSH's stock policy — a non-loopback page never persis
 window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), ownsHost: true }
 ```
 
-DSH's loopback check then reads true and every settings-backed surface comes back. The `dsh-mobile` gateway already does this.
+`ctx.connection.isLoopback` then reads true and the surfaces that still gate on it come back. The `dsh-mobile` gateway already does this.
 
 ## Compatibility
 
-Current release `0.1.10` is verified against DSH `0.2.1-alpha.3`, and stays compatible with `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
+Current release `0.1.11` is verified against DSH `0.2.1-alpha.3`, and stays compatible with `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | DSH | Notes |
 | --- | --- | --- |
@@ -111,7 +111,8 @@ Current release `0.1.10` is verified against DSH `0.2.1-alpha.3`, and stays comp
 | `0.1.7` | `0.2.0-rc.1` | DSH skips it on `0.2.0-rc.2`; upgrade to `0.1.8`+ |
 | `0.1.8` | `0.2.0-rc.2` | |
 | `0.1.9` | `0.2.1-alpha.1` | |
-| **`0.1.10`** | **`0.2.1-alpha.3`** | Current release |
+| `0.1.10` | `0.2.1-alpha.3` | |
+| **`0.1.11`** | **`0.2.1-alpha.3`** | Current release |
 
 Upgrading from any earlier `0.1.x` needs no data migration and no config change. DSH releases newer than the ones listed are not declared compatible until they are tested; if the plugin is incompatible, disable or uninstall it rather than patching DSH core.
 

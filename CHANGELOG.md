@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.11 — 2026-10-15
+
+Verified DeepSeek Harness: `0.2.1-alpha.3`（与 `0.1.10` 同一目标；本次只改文档）。
+
+**纯文档版：修正两份 README 里的「局域网页面」说明，业务代码与 `0.1.10` 逐字节相同——升级不改变任何行为。发这一版是因为 npm 页面展示的是已发布包里的 README，只有重新发一版才能把改对的文档送上去。**
+
+- **旧说法在 `0.2.1-alpha.3` 上已不成立**：原文断言「DSH 对来源不是 loopback 的页面会关闭 Host 设置持久化，所有依赖设置的界面随之失效」，并把本插件的 LAN 直连通道描述成必需。核对两版客户端 bundle 后确认：`0.2.1-alpha.1` 的 `@deepseek-ai/dsh-client-ui-settings` 里有 `const persistence = ctx.remote.$host.isLoopback ? "host" : "memory"`，这个 `memory` 让共享镜像永不发 `settings.describe`、表单恒为 `unavailable`，于是 `hostDirectScope` 那条回退成为必需；`0.2.1-alpha.3` 把这一行连同整个客户端持久化概念一并删掉（该 bundle 里 `isLoopback` / `persistence` / `$host` 均 0 次出现），alpha.3 的表单只在 Host 的 describe 答案里缺该 namespace 时才 `unavailable`。Host 侧 `@deepseek-ai/dsh-settings` 的 `lib/` 在 alpha.1↔alpha.3 之间**逐字节相同**，且不含任何按来源（loopback / principal / authority / peer）的判定，所以非回环页面会照常拿到那一份共享设置。结论：LAN 直连通道在 alpha.3 上退化为休眠，读写导入导出走官方表单；对更旧的 DSH 它仍然必需。
+- **两份 README 改为按 DSH 版本分开讲**：`0.2.1-alpha.1` 及更早是什么行为、`0.2.1-alpha.3` 起是什么行为，中英文逐句对应。末尾的 `window.__DSH_TRANSPORT__ = { …, ownsHost: true }` 变通保留，但措辞改为「`ctx.connection.isLoopback` 会据此为真，**仍以此为准的**界面一并恢复」——因为 alpha.3 里 `ui-settings-general` 的文档控制器等界面仍在读 `$host.isLoopback`，而共享的 `configForms` 已经不看它了；`ownsHost: true` 本身在 alpha.3 依旧有效（`dsh-client-connection` 里 `isLoopback: transport?.ownsHost === true || pageLocation === void 0 || isLoopbackHostname(...)`）。
+- **兼容表补 `0.1.11` 一行**，两份 README 的顶部支持声明与兼容段落同步到 `0.1.11`。`package.json` 的 peer 范围、`dsh.engines.dsh`、`dsh.compatibility.dshReleases`、devDependency 均与 `0.1.10` 一致（都是 `0.2.1-alpha.3`）——本次没有任何兼容性改动。
+- **顺手核对的两件事**：Release 正文格式与家族主流一致（双语锚点 + `⚠️ 调整` / `⚠️ Changed` + `### 升级` / `### Upgrade`，与 `dsh-session-colors` v0.1.8、`dsh-update-status` v0.4.2 同构；`dsh-lan-guard`、`dsh-notify` 用的是它们各自的 `🔌` 小节样式）；`pnpm run verify` 与 98/98 测试仍全绿。
+
 ## 0.1.10 — 2026-10-15
 
 Verified DeepSeek Harness: `0.2.1-alpha.3`（npm dist-tag `alpha`；`latest`/`next` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
