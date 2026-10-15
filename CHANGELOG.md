@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.10 — 2026-10-15
+
+Verified DeepSeek Harness: `0.2.1-alpha.3`（npm dist-tag `alpha`；`latest`/`next` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+**本版声明支持最新 DSH `0.2.1-alpha.3`：产品代码与 `0.1.9` 逐字节相同——没有迁移数据、没有改配置。0.1.9 那个版本其实已经能在 alpha.3 上装载，本版只是把已验证版本写明，并钉高类型检查所用的宿主类型面。**
+
+- **门禁放行，且不依赖版本豁免**：`dsh --profile web --dump-config` 退出码 0、stderr 零警告，`dsh-quick-replies` 条目在合成树里（`config.items` 完整）。DSH 的门禁是 `@deepseek-ai/dsh-app-boot` 的 `evaluatePluginCompatibility`，它**只**比对 `@deepseek-ai/dsh-*` 前缀的 peerDependencies，且用 `semver.satisfies(..., { includePrerelease: true })`。本插件的 peer 尾段 `>=0.2.0 <0.3.0` 只在宽松规则下接纳 `0.2.1-alpha.2`/`alpha.3`（node-semver 默认规则下 `0.2.1-alpha.1` 这个「同 tuple + 预发布」比较器只能证明它自己，`alpha.3` 不在其中）；`plugin_manager list_version_exemptions` 显示本插件**没有**任何豁免，走的是原生通过——这点重要，因为精确版本豁免不跨运行时继承。
+- **peer 与 `dsh.engines.dsh` 显式加入 `0.2.1-alpha.3`**：两处范围改为 `>=0.1.7-alpha.2 <0.2.0-0 || 0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-alpha.1 || 0.2.1-alpha.3 || >=0.2.0 <0.3.0`。加入后 `0.2.1-alpha.3` 在 node-semver 默认规则与门禁的 `includePrerelease` 规则下**都**接纳；`0.2.1-alpha.2` 等未实测的预发布仍只由尾段在门禁侧接纳，`0.2.0`/`0.2.1` 正式版照常接纳，`0.3.0` 仍在大门外。只声明实测过的版本，是沿用 `0.1.9` 的做法。
+- **宿主面逐字节核对**：`@deepseek-ai/dsh-settings` 的 `lib/` 在 `0.2.1-alpha.1` 与 `0.2.1-alpha.3` 之间**完全相同**（两版只差 `locale/` 与 `package.json`），所以本插件宿主半边调用的 `ctx.settings.describe()` 与 `ctx.inject(['settings'])` 未动。
+- **插件消费的客户端契约逐项仍在**：`ctx.configForms.get(entryId)`、`remote.settings` 的 `describe`/`mutate`、`remote.$on('settings/document-updated')`（前向事件表里仍是 `mode: "emit"` 且未声明 `resources`，即走 `global`）、`connection.state.getSnapshot()` 三态、`connection/reset` 事件（类型声明仍在，发射方是 `dsh-api-gateway` 的浏览器半边）、`sessions.binding`/`scope`、`conversation.blocks.storeFor`、`input.for().state.getSnapshot().phase` 四态、以及 `conversation.input.dock` 槽位声明。
+- **alpha.3 新增的访问控制层不挡本插件**：`dsh-client-connection` 把浏览器 peer 建成 `principal: { kind: "owner" }`，gateway 只在 `principal.kind !== "owner"` 时才征询 `remoteAccess.decide()`。实测非 loopback 页面注入的 `__DSH_REMOTE_ACCESS__` 就是 `{"type":"baseline","owner":true}`，所以手机上那条 LAN 通路上的设置读写不被收紧。
+- **已知漂移（本版有意不修，记录在案）**：alpha.3 从 `ui-settings` **删除了 `ConfigFormSnapshot.mode`（`'host' | 'memory'`）**，并整体移除客户端「非 loopback ⇒ memory 持久化」的概念（该 bundle 里的 `persistence`、`remote.$host.isLoopback` 一并消失，alpha.1 曾是 `status: persistence === "host" ? "loading" : "unavailable"`）。本插件 `src/client/settings/configFormScope.ts` 仍在读 `snapshot.mode`，运行时该字段现在恒为 `undefined`。影响是**中性的**：`libraryStore` 的可写判定 `snap.writable === true && snap.mode !== 'memory'` 退化为 `snap.writable === true`（结论不变），而 `'memory'` 那条存储提示在 `stateOf` 里本来就被 `status === 'unavailable'` 的提前返回挡住、两个版本下都不可达。LAN 回退判的是 `status === 'unavailable'` 而不是 `mode`，所以 `hostDirectScope` 仍然有效；alpha.3 不再把非 loopback 页面强制钉成 unavailable，因此手机上现在多半直接走官方通路、直连通道退化为休眠回退——两条路都给同一份共享库。清理这处死代码留作后续单独的版本，不与本次声明式发版混在一起。
+- **真实 profile 端到端**：门禁与合成树见上；另有运行态实测——LAN 页面（非 loopback，走 `3081`）的模块清单里含 `{"id":"dsh-quick-replies","url":"plugins/??dsh-quick-replies/client.js&rev=…"}`，该 URL 取回 200（107 KB），其声明的 5 个 inject 目标也都在该页面的客户端模块表内。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-alpha.1` 钉到 `0.2.1-alpha.3`**：本仓库类型检查从「直接针对 `0.2.1-alpha.1`」升级为「直接针对 `0.2.1-alpha.3`」。98 项测试全部通过（含按 harness 方式装载 `lib/` 产物的 lane），`pnpm run verify` 全绿。
+- **文档**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.10`；`docs/releases/v0.1.10.md` 按现行版式写（双语锚点 + 一句话 + 三条要点 + 升级命令）。
+
 ## 0.1.9 — 2026-10-08
 
 Verified DeepSeek Harness: `0.2.1-alpha.1`（2026-10-03 发布），同时保持对 `0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
