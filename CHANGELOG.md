@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.13 — 2026-10-16
+
+Verified DeepSeek Harness: `0.2.1-alpha.4`（npm dist-tag `alpha`；`latest`/`next` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+**本版声明支持最新 DSH `0.2.1-alpha.4`：产品代码与 `0.1.12` 逐字节相同——没有迁移数据、没有改配置。`0.1.12` 其实已经能在 alpha.4 上装载，本版把已验证版本写明，并钉高类型检查所用的宿主类型面。**
+
+- **门禁放行，但此前只靠宽松规则**：用 DSH 自带的 `evaluatePluginCompatibility` 实测，`0.1.12` 的 manifest 对 `0.2.1-alpha.4` 是 ADMITTED，靠的是尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease` 下接纳排序高于 `0.2.0` 的预发布；换成 node-semver 默认规则则是 **false**。本版把 `0.2.1-alpha.4` 显式加入 `dsh.engines.dsh` 与 peer `@deepseek-ai/dsh-settings` 两处范围后，它在两种规则下**都**接纳。`0.2.1-alpha.2` 仍未实测、故意不声明，只由尾段在门禁侧接纳；`0.2.0`/`0.2.1` 正式版照常接纳，`0.3.0` 仍在大门外（实测 REJECTED）。
+- **真实 profile 端到端**：`dsh --profile web --dump-config` 在 alpha.4 上退出码 0、**stderr 零行**，`dsh-quick-replies` 行在合成树里。
+- **alpha.3 → alpha.4 逐包核对，插件消费的接口全部完好**：
+  - `@deepseek-ai/dsh-client-ui-settings`、`@deepseek-ai/dsh-settings`、`@deepseek-ai/dsh-client-connection` 三包**只有 `package.json` 不同**，库代码逐字节相同 → `ctx.configForms.get(entryId)`、`ctx.settings.describe()`、`connection.state`、`connection/reset` 均未动。
+  - `@deepseek-ai/dsh-api-session-controller` 只有 `typert.host.js` 与 manifest 变化，**客户端契约零 diff** → `sessions.binding`/`scope` 未动。
+  - `@deepseek-ai/dsh-api-remotes` 有 7 个文件变化，但 `settings/document-updated` 在前向事件表里仍是 `mode: "emit"`（本次只是在它前面新增了一条无关的 `plugin-market/changed`），`$on` 与 settings 命名空间面都在。
+  - `@deepseek-ai/dsh-client-ui-conversation` 变化最多（17 个文件），但**本插件注册的槽位契约 `contract/slots.d.ts` 零 diff**，`conversation.input.dock` 声明未动；`composer-blocks` 的 `storeFor` 与 `input.for(` 未动；`InputState.phase` 四个取值 `'plain' | 'adjudicating' | 'claimed' | 'submitting'` 逐字未变（`contract/input.d.ts:268`）。
+- **alpha.4 里唯一实质的客户端改动与本插件无关**：命令 chip 模型（新增 `CommandClaim` 解析入口 `resolveClaim`，`InputEvent` 的 `draft-changed` 载荷由 `{ draft: string }` 改为 `{ command: CommandClaim | undefined }`，`beginCommand` 改走 chip）。本插件在 `src/` 里对 `InputEvent`、`draft-changed`、`resolveClaim`、`CommandClaim`、`beginCommand` 的引用**全为 0 处**——它只读输入机的 `phase`，从不订阅输入事件、也从不改写草稿（这是它既有的设计边界）。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-alpha.3` 钉到 `0.2.1-alpha.4`**：本仓库类型检查从「直接针对 alpha.3」升级为「直接针对 alpha.4」。98 项测试全部通过，`pnpm run verify` 全绿（含 pack dry-run 产出 `0.1.13`）。
+- **文档**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.13`；`docs/releases/v0.1.13.md` 按现行版式写（双语锚点 + 一句话 + 三条要点 + 升级命令）。
+
 ## 0.1.12 — 2026-10-15
 
 Verified DeepSeek Harness: `0.2.1-alpha.3`（与 `0.1.10` / `0.1.11` 同一目标）。
