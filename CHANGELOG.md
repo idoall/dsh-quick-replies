@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.14 — 2026-10-16
+
+Verified DeepSeek Harness: `0.2.1-alpha.5`（npm dist-tag `alpha`；`latest`/`next` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+**本版声明支持最新 DSH `0.2.1-alpha.5`：产品代码与 `0.1.13` 逐字节相同——没有迁移数据、没有改配置。`0.1.13` 其实已经能在 alpha.5 上装载，本版把已验证版本写明，并钉高类型检查所用的宿主类型面。**
+
+- **门禁放行，但此前只靠宽松规则**：用 DSH 自带的 `evaluatePluginCompatibility` 实测，`0.1.13` 的 manifest 对 `0.2.1-alpha.5` 是 ADMITTED，靠的是尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease` 下接纳排序高于 `0.2.0` 的预发布；换成 node-semver 默认规则则是 **false**。把 `0.2.1-alpha.5` 显式加入 `dsh.engines.dsh` 与 peer `@deepseek-ai/dsh-settings` 两处范围后，它在两种规则下**都**接纳（实测 strict 也变 true）。`0.3.0` 仍在大门外（实测 REJECTED）。
+- **真实 profile 端到端**：`dsh --profile web --dump-config` 在 alpha.5 上退出码 0、**stderr 零行**，`dsh-quick-replies` 行在合成树里。
+- **alpha.4 → alpha.5 逐包核对，本插件消费的接口全部完好**，而且这一版比上一版安静得多：
+  - `@deepseek-ai/dsh-client-ui-settings`、`@deepseek-ai/dsh-settings`、`@deepseek-ai/dsh-client-connection`、`@deepseek-ai/dsh-api-session-controller`、`@deepseek-ai/dsh-client-ui-conversation` **五包都只有 `package.json` 不同**，库代码与类型声明逐字节相同 → `ctx.configForms.get(entryId)`、`ctx.settings.describe()`、`connection.state`/`connection/reset`、`sessions.binding`/`scope`、`composer-blocks` 的 `storeFor`、`input.for(`、`InputState.phase` 四态全部未动。上一版改动较多的 `ui-conversation` 这次**零代码变化**，本插件注册的槽位契约 `contract/slots.d.ts` 仍与 alpha.4 完全相同。
+  - `@deepseek-ai/dsh-api-remotes` 只有 `lib/client.js` 与 manifest 变化，**类型面零 diff**（客户端 bundle 体积 1083959 → 1083920 字节，仅 −39 字节）。`settings/document-updated` 仍在 `lib/types/remote-events.d.ts` 的前向事件表里（`mode: "emit"`）、仍在宿主 `lib/index.js` 中；`$on` 仍在 4 个类型文件里。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-alpha.4` 钉到 `0.2.1-alpha.5`**：本仓库类型检查从「直接针对 alpha.4」升级为「直接针对 alpha.5」。98 项测试全部通过，`pnpm run verify` 全绿（含 pack dry-run 产出 `0.1.14`）。
+- **文档**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.14`（中英文同步）；`docs/releases/v0.1.14.md` 按现行版式写（双语锚点 + 一句话 + 三条要点 + 升级命令）。发版前逐项核对过：README 中英文、release notes 标题与锚点、以及"支持的 DSH 版本号"三处口径一致。
+
 ## 0.1.13 — 2026-10-16
 
 Verified DeepSeek Harness: `0.2.1-alpha.4`（npm dist-tag `alpha`；`latest`/`next` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
