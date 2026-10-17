@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.15 — 2026-10-17
+
+Verified DeepSeek Harness: `0.2.1-rc.2`（npm dist-tag `next`；`alpha` 停在 `0.2.1-alpha.5`，`latest` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+**本版声明支持 DSH `0.2.1-rc.2`——`0.2.1` 的首个候选版，也是本插件第一次面向 RC 而非 alpha 做声明。产品代码与 `0.1.14` 逐字节相同：没有迁移数据、没有改配置。**
+
+- **门禁放行，但此前只靠宽松规则**：用 DSH 自带的 `evaluatePluginCompatibility` 实测，`0.1.14` 的 manifest 对 `0.2.1-rc.2` 是 ADMITTED，靠的是尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease` 下接纳排序高于 `0.2.0` 的预发布；换成 node-semver 默认规则则是 **false**（预发布要放行，需要同一比较器集合里存在同 `major.minor.patch` 且带预发布标签的比较器——尾段那两个比较器的 tuple 是 `0.2.0` 与 `0.3.0`，证不到 `0.2.1`）。把 `0.2.1-rc.2` 显式加入 `dsh.engines.dsh` 与 peer `@deepseek-ai/dsh-settings` 两处范围后，它在两种规则下**都**接纳（实测 strict 也变 true）。`0.2.1-rc.1` 未实测、故意不声明，仍只由尾段在门禁侧接纳；`0.2.0`/`0.2.1` 正式版照常接纳，`0.3.0` 仍在大门外（实测 REJECTED）。
+- **真实 profile 端到端**：`dsh --profile web --dump-config` 在 `0.2.1-rc.2` 上退出码 0、**stderr 零行**，`dsh-quick-replies` 行在合成树里。
+- **alpha.5 → rc.2 逐包核对：这是一次纯元数据发布。** 本插件消费的六个包——`@deepseek-ai/dsh-client-ui-settings`、`dsh-settings`、`dsh-api-remotes`、`dsh-client-connection`、`dsh-api-session-controller`、`dsh-client-ui-conversation`——**每一个的整棵包树都只差 `package.json` 一个文件**，即 `lib/` 与全部类型声明与 alpha.5 逐字节相同。因此 `ctx.configForms.get(entryId)`、`ctx.settings.describe()`、`remote.settings` 的 `describe`/`mutate`、`remote.$on('settings/document-updated')`、`connection.state`/`connection/reset`、`sessions.binding`/`scope`、`composer-blocks` 的 `storeFor`、`input.for(`、`InputState.phase` 四态、以及本插件注册的槽位契约 `contract/slots.d.ts` 全部未动。这一版比 alpha.4→alpha.5 还要干净：连 `dsh-api-remotes` 那 39 字节的客户端 bundle 差异都没有了。
+- **`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-alpha.5` 钉到 `0.2.1-rc.2`**：本仓库类型检查从「直接针对 alpha.5」升级为「直接针对 `0.2.1-rc.2`」。98 项测试全部通过，`pnpm run verify` 全绿（含 pack dry-run 产出 `0.1.15`）。
+- **文档与产物一致性**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.15`（中英文同步）；`docs/releases/v0.1.15.md` 按现行版式写。发 tag 前逐项核对过 README 中英文、release notes 标题与锚点、以及"支持的 DSH 版本号"三处口径一致；发布后另取了 npm 上的 tarball 与本地构建产物逐文件比对，确认包内容同步。
+
 ## 0.1.14 — 2026-10-16
 
 Verified DeepSeek Harness: `0.2.1-alpha.5`（npm dist-tag `alpha`；`latest`/`next` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。

@@ -20,7 +20,7 @@
 
 > A DeepSeek Harness community plugin. It mounts above the session composer and never modifies DSH source.
 >
-> **Supports DSH `0.2.1-alpha.5`.** Verified against it and still compatible with `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.14`.
+> **Supports DSH `0.2.1-rc.2`.** Verified against it and still compatible with `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.15`.
 
 A row of stored text chips sits above the input. Tapping one sends it as an ordinary user message: queued while the session is idle, steered at the next safe boundary while it runs. The plugin never rewrites your draft, never cancels anything, and never stops work.
 
@@ -98,7 +98,7 @@ window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), 
 
 ## Compatibility
 
-Current release `0.1.14` is verified against DSH `0.2.1-alpha.5`, and stays compatible with `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
+Current release `0.1.15` is verified against DSH `0.2.1-rc.2`, and stays compatible with `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | DSH | Notes |
 | --- | --- | --- |
@@ -113,7 +113,8 @@ Current release `0.1.14` is verified against DSH `0.2.1-alpha.5`, and stays comp
 | `0.1.9` | `0.2.1-alpha.1` | |
 | `0.1.10`–`0.1.12` | `0.2.1-alpha.3` | |
 | `0.1.13` | `0.2.1-alpha.4` | |
-| **`0.1.14`** | **`0.2.1-alpha.5`** | Current release |
+| `0.1.14` | `0.2.1-alpha.5` | |
+| **`0.1.15`** | **`0.2.1-rc.2`** | Current release |
 
 Upgrading from any earlier `0.1.x` needs no data migration and no config change. DSH releases newer than the ones listed are not declared compatible until they are tested; if the plugin is incompatible, disable or uninstall it rather than patching DSH core.
 
