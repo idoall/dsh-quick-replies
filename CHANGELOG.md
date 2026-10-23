@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.16 — 2026-10-23
+
+- Declare compatibility with DSH `0.2.1-rc.3` in the DSH engine range, settings peer range and compatibility matrix; pin the settings development dependency to the same release.
+- Review rc.2 → rc.3 changes in the six directly consumed official packages: settings and connection implementations are unchanged; session-controller changes only a declaration comment; conversation draft initialization, view actions/pins and analytics changes do not alter the dock, session prompt, input-phase or settings interfaces used here. No product source changes are required.
+- Synchronize English and Chinese README support statements and compatibility tables with plugin `0.1.16` / DSH `0.2.1-rc.3`, and add bilingual release notes.
+- Validation covers typechecks, tests, build and package checks. Live browser interaction is not claimed: the connected Client did not expose the requested dock in Inspect. No profile or other workspace plugin was changed.
+
 ## 0.1.15 — 2026-10-17
 
 Verified DeepSeek Harness: `0.2.1-rc.2`（npm dist-tag `next`；`alpha` 停在 `0.2.1-alpha.5`，`latest` 仍是 `0.2.0-rc.2`），同时保持对 `0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
