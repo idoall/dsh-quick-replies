@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.17 — 2026-10-27
+
+Verified DeepSeek Harness: `0.2.1-rc.4`（npm dist-tag `next`；`latest` 仍是 `0.2.1-rc.2`，`alpha` 停在 `0.2.1-alpha.5`），同时保持对 `0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+- **门禁放行，但此前只靠宽松规则**：用 DSH 自带的 `evaluatePluginCompatibility` 实测，`0.1.16` 的 manifest 对 `0.2.1-rc.4` 是 ADMITTED，靠的是尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease` 下接纳排序高于 `0.2.0` 的预发布；换成 node-semver 默认规则则是 **false**。把 `0.2.1-rc.4` 显式加入 `dsh.engines.dsh` 与 peer `@deepseek-ai/dsh-settings` 两处范围后，它在两种规则下**都**接纳（实测 strict 也变 true）。`0.3.0` 仍在大门外（实测 REJECTED）。
+- **rc.3 → rc.4 逐包核对，本插件消费的接口全部完好。** 六个直接消费的官方包里，`dsh-settings`、`dsh-client-ui-settings`、`dsh-api-remotes`、`dsh-client-connection`、`dsh-api-session-controller` **五包只有 `package.json` 一个文件不同**，库代码与类型声明逐字节相同。`dsh-client-ui-conversation` 只改了两处：删掉 locale 键 `session.moreViewsCurrent`（`locales.d.ts` 与 `lib/client.js`），以及给 View 标签加了「文字溢出才出现」的 tooltip（`ViewTabLabel` / `labelNeedsTooltip`）。本插件注册的槽位契约与 `composer-blocks` 的 `storeFor`、`input.for(`、`InputState.phase` 四态、`ctx.settings.describe()`/`mutate`、`ctx.configForms.get(entryId)`、`connection.state` 全部未动；本插件也从不引用该 locale 键。
+- **真实 profile 端到端**：`dsh --profile web --dump-config` 在 `0.2.1-rc.4` 上退出码 0、**stderr 零行**，`dsh-quick-replies` 行在合成树里。
+- **类型面钉到 `0.2.1-rc.4`**：`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-rc.3` 改为 `0.2.1-rc.4`，类型检查直接针对 rc.4。98 项测试全部通过，`pnpm run verify` 全绿（含 pack dry-run 产出 `0.1.17`）。
+- **产品代码零变化**：`src/` 未改，构建出的 `lib/index.js`、`lib/client.js`、`lib/index.d.ts` 与 npm 上 `0.1.16` 的 tarball 逐字节相同——没有迁移数据、没有改配置。
+- **文档同步**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.17`（中英文一致）；`docs/releases/v0.1.17.md` 按现行双语版式写。
+
 ## 0.1.16 — 2026-10-23
 
 - Declare compatibility with DSH `0.2.1-rc.3` in the DSH engine range, settings peer range and compatibility matrix; pin the settings development dependency to the same release.
