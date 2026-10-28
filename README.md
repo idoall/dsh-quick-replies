@@ -20,7 +20,7 @@
 
 > A DeepSeek Harness community plugin. It mounts above the session composer and never modifies DSH source.
 >
-> **Supports DSH `0.2.1-rc.4`.** Compatibility checked against it and still compatible with `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.17`.
+> **Supports DSH `0.2.2-alpha.2`.** Compatibility checked against it and still compatible with `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.18`.
 
 A row of stored text chips sits above the input. Tapping one sends it as an ordinary user message: queued while the session is idle, steered at the next safe boundary while it runs. The plugin never rewrites your draft, never cancels anything, and never stops work.
 
@@ -98,7 +98,7 @@ window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), 
 
 ## Compatibility
 
-Current release `0.1.17` has been compatibility-checked against DSH `0.2.1-rc.4`, and stays compatible with `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
+Current release `0.1.18` has been compatibility-checked against DSH `0.2.2-alpha.2`, and stays compatible with `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | DSH | Notes |
 | --- | --- | --- |
@@ -116,7 +116,8 @@ Current release `0.1.17` has been compatibility-checked against DSH `0.2.1-rc.4`
 | `0.1.14` | `0.2.1-alpha.5` | |
 | `0.1.15` | `0.2.1-rc.2` | |
 | `0.1.16` | `0.2.1-rc.3` | |
-| **`0.1.17`** | **`0.2.1-rc.4`** | Current release |
+| `0.1.17` | `0.2.1-rc.4` | |
+| **`0.1.18`** | **`0.2.2-alpha.2`** | Current release; also fixes the new `sending` input phase |
 
 Upgrading from any earlier `0.1.x` needs no data migration and no config change. DSH releases newer than the ones listed are not declared compatible until they are tested; if the plugin is incompatible, disable or uninstall it rather than patching DSH core.
 

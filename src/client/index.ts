@@ -139,7 +139,8 @@ function makeContextReaders(ctx: ClientCtx) {
       const conversation = actx.get('conversation') as { input?: { for?(ax: unknown): unknown } } | undefined
       const facade = conversation?.input?.for?.(actx) as { state?: { getSnapshot?(): { phase?: string } } } | undefined
       const phase = facade?.state?.getSnapshot?.().phase
-      return phase === 'plain' || phase === 'adjudicating' || phase === 'claimed' || phase === 'submitting'
+      return phase === 'plain' || phase === 'adjudicating' || phase === 'claimed'
+        || phase === 'submitting' || phase === 'sending'
         ? phase
         : undefined
     } catch {
