@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.19 — 2026-11-03
+
+Verified DSH: `0.2.2-alpha.3` (npm `alpha`, installed runtime) and `0.2.1-rc.5` (`latest` / `next`).
+
+- 显式同步 DSH engine、settings peer 与兼容矩阵，保留已有支持范围；产品代码无变化，无需迁移回复库或修改配置。
+- 对照六个直接使用的官方包：rc.4 → rc.5 仅包元数据变化；alpha.2 → alpha.3 保留本插件使用的 prompt、binding/scope、输入阶段、dock、configForms 和 settings 接口。
+- 开发依赖对齐 settings `0.2.2-alpha.3`、Cordis `4.0.6-alpha.2`、Schemastery `3.18.6-alpha.2`；显式补齐 include / group 开发期 peer 依赖，消除旧锁文件的 peer 不匹配。
+- CI、Release 和 verify 先构建再测试，防止干净环境跳过构建产物测试；新增 3 项发布版本、双语文档和流程一致性测试。
+- 同步中英文 README 与双语 Release；澄清当前 DSH 要求 Node.js 24.9.0+，不能仅按插件自身 Node.js 20 下限安装宿主。
+- 验证覆盖官方包接口、类型检查、单元/UI 测试和构建产物；GUI 返回 HTTP 401，Client Inspect 未暴露 dock，因此不宣称真实浏览器端到端通过。未修改 profile 或其他工作区插件。
+
+This compatibility patch updates metadata and development dependencies without changing product behavior. CI, Release and local verification build before testing, with three new release-consistency tests. Both READMEs and bilingual release notes are synchronized. Live browser interaction remains unverified; no profile or other workspace plugin was modified.
+
 ## 0.1.18 — 2026-10-28
 
 Verified DeepSeek Harness: `0.2.2-alpha.2`（npm dist-tag `alpha`；`latest` 仍是 `0.2.1-rc.2`，`next` 是 `0.2.1-rc.4`），同时保持对 `0.2.1-rc.4`、`0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
