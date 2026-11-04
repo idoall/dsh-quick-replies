@@ -20,7 +20,7 @@
 
 > DeepSeek Harness 社区插件，挂在当前会话输入区上方，不修改 DSH 源码。
 >
-> **已支持 DSH `0.2.2-alpha.3`（alpha）与 `0.2.1-rc.5`（latest/next）。** 已针对两者检查兼容性，同时兼容 `0.2.2-alpha.2`、`0.2.1-rc.4`、`0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与 `0.1.7` 线——插件 `0.1.19`。
+> **已支持 DSH `0.2.2-rc.1`（next）。** 已针对该版本检查兼容性，同时兼容 `0.2.2-alpha.3`（alpha）、`0.2.1-rc.5`（latest）、`0.2.2-alpha.2`、`0.2.1-rc.4`、`0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与 `0.1.7` 线——插件 `0.1.20`。
 
 输入框上方显示一排快捷文本。点击后作为普通用户消息发送：会话空闲时进队列，运行中则在下一个安全边界 steer。不改草稿、不 cancel、不 stop。
 
@@ -41,7 +41,7 @@
 
 ## 安装
 
-需要带 Web profile 的 DeepSeek Harness。插件本身要求 Node.js 20 或更新版本，但 DSH `0.2.2-alpha.3` 要求 **Node.js 24.9.0 或更新版本**；请以宿主更高的要求为准。
+需要带 Web profile 的 DeepSeek Harness。插件本身要求 Node.js 20 或更新版本，但 DSH `0.2.2-rc.1` 要求 **Node.js 24.9.0 或更新版本**；请以宿主更高的要求为准。
 
 ```sh
 dsh plugin --profile web add dsh-quick-replies@latest
@@ -98,7 +98,7 @@ window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), 
 
 ## 兼容性
 
-当前发布 `0.1.19` 已针对 DSH `0.2.2-alpha.3` 与 `0.2.1-rc.5` 检查兼容性，同时兼容 `0.2.2-alpha.2`、`0.2.1-rc.4`、`0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与 `0.1.7` 线（`0.1.7-rc.2`、`0.1.7-rc.1`、`0.1.7-alpha.2`）。
+当前发布 `0.1.20` 已针对 DSH `0.2.2-rc.1` 检查兼容性，继续支持 `0.2.2-alpha.3`、`0.2.1-rc.5`、`0.2.2-alpha.2`、`0.2.1-rc.4`、`0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与 `0.1.7` 线（`0.1.7-rc.2`、`0.1.7-rc.1`、`0.1.7-alpha.2`）。
 
 | 插件 | DSH | 说明 |
 | --- | --- | --- |
@@ -118,7 +118,8 @@ window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), 
 | `0.1.16` | `0.2.1-rc.3` | |
 | `0.1.17` | `0.2.1-rc.4` | |
 | `0.1.18` | `0.2.2-alpha.2` | 适配新增的 `sending` 输入阶段 |
-| **`0.1.19`** | **`0.2.2-alpha.3` / `0.2.1-rc.5`** | 当前发布；更新兼容声明与发布检查 |
+| `0.1.19` | `0.2.2-alpha.3` / `0.2.1-rc.5` | 更新兼容声明与发布检查 |
+| **`0.1.20`** | **`0.2.2-rc.1`** | 当前发布；开发依赖对齐 Cordis 4.1 / Schemastery 3.19 |
 
 本次检查覆盖官方包接口、类型检查、单元/UI 测试与构建产物。未完成真实浏览器交互验证：GUI 返回 HTTP 401，Client Inspect 未暴露此插件使用的槽位。未修改 profile 配置或其他工作区插件。
 
@@ -136,8 +137,8 @@ dsh plugin --profile web remove dsh-quick-replies
 
 ```sh
 pnpm install
-pnpm run test
 pnpm run build
+pnpm run test
 ```
 
 `pnpm run test` 会跑 `tsc --noEmit` 和全部 vitest 项目：共享/Host 逻辑、客户端逻辑、jsdom UI 用例，以及一条按 DSH 方式加载 `lib/` 的构建产物用例。先 build 一次，产物用例才有东西可加载。

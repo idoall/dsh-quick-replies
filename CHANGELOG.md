@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.20 — 2026-11-04
+
+Verified DSH: `0.2.2-rc.1` (installed runtime and npm `next`). npm `latest` remains `0.2.1-rc.5`; `alpha` remains `0.2.2-alpha.3`.
+
+- 显式将 `0.2.2-rc.1` 加入 DSH engine、settings peer 与兼容矩阵，保留已有支持范围；严格 semver 与 DSH 门禁均通过，`0.3.0` 仍被拒绝。
+- 六个直接使用的官方包从 alpha.3 到 rc.1 仅 `package.json` 变化，运行代码、声明与文档逐字节相同；无需修改产品代码或迁移数据。
+- 开发依赖对齐 settings `0.2.2-rc.1`、Cordis `4.1.0`、Schemastery `3.19.0`、include / group `1.1.0`。既有 Cordis / Schemastery peer 范围已覆盖新版。
+- 同步中英文 README、双语 Release 及 npm manifest；修正 README 开发命令为先构建再测试，并增加一致性断言。
+- 验证覆盖类型、单元/UI 与构建产物；GUI 返回 HTTP 401，Client Inspect 未暴露输入槽位，未验证真实页面发送。不改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.2-rc.1` support and aligns development dependencies. The six consumed official packages differ from alpha.3 only in package metadata; product code and stored data are unchanged. Bilingual documentation and release checks are synchronized, including build-before-test README commands. Live browser sending remains unverified.
+
 ## 0.1.19 — 2026-11-03
 
 Verified DSH: `0.2.2-alpha.3` (npm `alpha`, installed runtime) and `0.2.1-rc.5` (`latest` / `next`).

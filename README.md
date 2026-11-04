@@ -20,7 +20,7 @@
 
 > A DeepSeek Harness community plugin. It mounts above the session composer and never modifies DSH source.
 >
-> **Supports DSH `0.2.2-alpha.3` (alpha) and `0.2.1-rc.5` (latest/next).** Compatibility checked against both and still compatible with `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.19`.
+> **Supports DSH `0.2.2-rc.1` (next).** Compatibility checked against this release; also supports `0.2.2-alpha.3` (alpha), `0.2.1-rc.5` (latest), `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.20`.
 
 A row of stored text chips sits above the input. Tapping one sends it as an ordinary user message: queued while the session is idle, steered at the next safe boundary while it runs. The plugin never rewrites your draft, never cancels anything, and never stops work.
 
@@ -41,7 +41,7 @@ The reply library is one Host settings entry (`dsh-quick-replies`), so every bro
 
 ## Install
 
-You need DeepSeek Harness with a Web profile. The plugin requires Node.js 20 or newer, but DSH `0.2.2-alpha.3` itself requires **Node.js 24.9.0 or newer**; follow the stricter host requirement.
+You need DeepSeek Harness with a Web profile. The plugin requires Node.js 20 or newer, but DSH `0.2.2-rc.1` itself requires **Node.js 24.9.0 or newer**; follow the stricter host requirement.
 
 ```sh
 dsh plugin --profile web add dsh-quick-replies@latest
@@ -98,7 +98,7 @@ window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), 
 
 ## Compatibility
 
-Current release `0.1.19` has been compatibility-checked against DSH `0.2.2-alpha.3` and `0.2.1-rc.5`, and stays compatible with `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
+Current release `0.1.20` has been compatibility-checked against DSH `0.2.2-rc.1`, and retains support for `0.2.2-alpha.3`, `0.2.1-rc.5`, `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | DSH | Notes |
 | --- | --- | --- |
@@ -118,7 +118,8 @@ Current release `0.1.19` has been compatibility-checked against DSH `0.2.2-alpha
 | `0.1.16` | `0.2.1-rc.3` | |
 | `0.1.17` | `0.2.1-rc.4` | |
 | `0.1.18` | `0.2.2-alpha.2` | Handles the new `sending` input phase |
-| **`0.1.19`** | **`0.2.2-alpha.3` / `0.2.1-rc.5`** | Current release; compatibility metadata and release checks updated |
+| `0.1.19` | `0.2.2-alpha.3` / `0.2.1-rc.5` | Compatibility metadata and release checks updated |
+| **`0.1.20`** | **`0.2.2-rc.1`** | Current release; development dependencies aligned with Cordis 4.1 / Schemastery 3.19 |
 
 The latest check covers official package contracts, typechecks, unit/UI tests and built artifacts. Live browser interaction was not verified: the GUI returned HTTP 401 and Client Inspect did not expose the dock. No profile configuration or other workspace plugin was changed.
 
@@ -136,8 +137,8 @@ Uninstalling keeps your reply library. To wipe it too, export the JSON from Mana
 
 ```sh
 pnpm install
-pnpm run test
 pnpm run build
+pnpm run test
 ```
 
 `pnpm run test` runs `tsc --noEmit` and the vitest projects — shared and Host logic, client logic, jsdom UI specs, and an artifact lane that loads `lib/` the way the harness does. Build first so the artifact lane has something to load.

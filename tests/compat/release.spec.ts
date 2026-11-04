@@ -12,6 +12,7 @@ describe('release consistency', () => {
       const text = read(file)
       expect(text).toContain(`**\`${manifest.version}\`**`)
       expect(text).toContain(`**\`${currentDsh}\``)
+      expect(text).toContain('pnpm install\npnpm run build\npnpm run test')
     }
     const notes = read(`docs/releases/${tag}.md`)
     expect(notes).toContain(`<h3 id="cn-${tag}">`)
@@ -25,7 +26,7 @@ describe('release consistency', () => {
     const engine = manifest.dsh.engines.dsh as string
     const peer = manifest.peerDependencies['@deepseek-ai/dsh-settings'] as string
     expect(peer).toBe(engine)
-    for (const version of [currentDsh, '0.2.1-rc.5']) {
+    for (const version of [currentDsh, '0.2.2-alpha.3', '0.2.1-rc.5']) {
       expect(engine.split(' || ')).toContain(version)
       expect(manifest.dsh.compatibility.dshReleases[version]).toBe('compatible')
     }
