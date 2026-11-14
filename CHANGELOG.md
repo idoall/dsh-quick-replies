@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.21 — 2026-11-14
+
+Verified DSH: `0.2.2-rc.3` (installed runtime and npm `next`, also `0.2.2-rc.2`). npm `latest` moved to `0.2.2-rc.1`; `alpha` remains `0.2.2-alpha.3`.
+
+- 显式将 `0.2.2-rc.2` 与 `0.2.2-rc.3` 加入 DSH engine、settings peer 与兼容矩阵，保留已有支持范围；DSH 自带兼容门禁与严格 semver 均接纳这两版，`0.3.0` 仍被拒绝。
+- rc.1 → rc.2 官方包改动较多，但都不落在本插件消费的接口上：客户端 bundle 改为压缩发布并附带 sourcemap 与 `src/`；契约增量包括 `insertQuote` 的可选 summary、空提示续跑（`allowEmpty` / `retry`）、`conversation.hero.frame` 槽位、composer `occurrence`、历史分页状态字段，以及移除插件从未使用的 `subagent.parentAvailable`。
+- 逐项核对本插件使用的接口，全部未变：`settings.configure`、`configForms.get`、`remote.settings` 的 describe/mutate 与 `settings/document-updated`、`sessions.binding/scope`、`prompt` 的 queue/steer 与所用 `SessionSnapshot` 字段、五态输入阶段、`composer-blocks.storeFor`、`conversation.input.dock`（list / session / `InputZone`）、`connection.state` 与 `connection/reset`。
+- rc.2 → rc.3 订阅面几乎无变化：六个包仅 `package.json` 版本不同，另有 `dsh-api-session-controller/lib/typert.host.js` 的 `RemoteErrorDetailsMap` 新增一个错误码，仍是纯增量。
+- 产品代码零变化：`lib/index.js`、`lib/index.d.ts`、`lib/client.js` 与 npm 上 `0.1.20` 的 tarball 逐字节相同；回复库、发送链路与折叠偏好无需迁移。
+- 开发依赖对齐 settings `0.2.2-rc.3`；Cordis `4.1.0`、Schemastery `3.19.0`、include / group `1.1.0` 不变。
+- 验证覆盖 `pnpm run verify`（构建、类型检查、101 项测试、pack dry-run）；`dsh --profile web --dump-config` 在 `0.2.2-rc.3` 上退出码 0、stderr 零行，插件行在合成树中。GUI 返回 HTTP 401，未验证真实页面点击发送；未改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.2-rc.3` support (and checks `0.2.2-rc.2`). The rc.1 → rc.2 changes are additive contract and packaging work — minified client bundles with sourcemaps and `src/`, quote summaries, empty-prompt continuation, a hero frame slot, composer occurrences and history paging status — none of which touch the surfaces this plugin consumes. rc.2 → rc.3 differs only in package versions plus one added remote error code. Product artifacts are byte-identical to `0.1.20`; no data migration is needed.
+
 ## 0.1.20 — 2026-11-04
 
 Verified DSH: `0.2.2-rc.1` (installed runtime and npm `next`). npm `latest` remains `0.2.1-rc.5`; `alpha` remains `0.2.2-alpha.3`.
