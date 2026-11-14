@@ -54,8 +54,8 @@ jobs:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run test
       - run: pnpm run build
+      - run: pnpm run test
       - name: Pack plugin
         run: |
           pnpm pack

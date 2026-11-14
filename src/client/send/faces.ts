@@ -72,8 +72,15 @@ export interface ComposerBlockLike {
   readonly reason?: string
 }
 
-/** Input admission phase published by the session input machine. */
-export type InputPhase = 'plain' | 'adjudicating' | 'claimed' | 'submitting'
+/**
+ * Input admission phase published by the session input machine.
+ *
+ * DSH 0.2.2 added `sending`: an ordinary message is waiting for the Host to
+ * accept it (the editor and attachments are read-only meanwhile). Every
+ * non-`plain` phase must refuse a quick reply, so `sending` joins the list
+ * rather than being folded into "unknown".
+ */
+export type InputPhase = 'plain' | 'adjudicating' | 'claimed' | 'submitting' | 'sending'
 
 /** Connection lifecycle state of the browser wire. */
 export type ConnectionState = 'connected' | 'disconnected' | 'connecting'

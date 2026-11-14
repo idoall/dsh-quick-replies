@@ -262,6 +262,10 @@ describe('QuickReplySender — specified-text sending', () => {
       { name: 'disconnected', env: { connection: 'disconnected' }, expected: 'disconnected' },
       { name: 'blocked', env: { blockReason: 'model locked' }, expected: 'composer-blocked' },
       { name: 'input-busy', env: { phase: 'submitting' }, expected: 'input-busy' },
+      // DSH 0.2.2 added the `sending` phase (an ordinary message waits for the
+      // Host to accept it): the composer is read-only there, so a quick reply
+      // must refuse exactly like the other busy phases.
+      { name: 'input-sending', env: { phase: 'sending' }, expected: 'input-busy' },
       { name: 'disabled', itemOverrides: { enabled: false }, expected: 'item-disabled' },
     ]
 

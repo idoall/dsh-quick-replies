@@ -1,5 +1,74 @@
 # Changelog
 
+## 0.1.21 — 2026-11-14
+
+Verified DSH: `0.2.2-rc.3` (installed runtime and npm `next`, also `0.2.2-rc.2`). npm `latest` moved to `0.2.2-rc.1`; `alpha` remains `0.2.2-alpha.3`.
+
+- 显式将 `0.2.2-rc.2` 与 `0.2.2-rc.3` 加入 DSH engine、settings peer 与兼容矩阵，保留已有支持范围；DSH 自带兼容门禁与严格 semver 均接纳这两版，`0.3.0` 仍被拒绝。
+- rc.1 → rc.2 官方包改动较多，但都不落在本插件消费的接口上：客户端 bundle 改为压缩发布并附带 sourcemap 与 `src/`；契约增量包括 `insertQuote` 的可选 summary、空提示续跑（`allowEmpty` / `retry`）、`conversation.hero.frame` 槽位、composer `occurrence`、历史分页状态字段，以及移除插件从未使用的 `subagent.parentAvailable`。
+- 逐项核对本插件使用的接口，全部未变：`settings.configure`、`configForms.get`、`remote.settings` 的 describe/mutate 与 `settings/document-updated`、`sessions.binding/scope`、`prompt` 的 queue/steer 与所用 `SessionSnapshot` 字段、五态输入阶段、`composer-blocks.storeFor`、`conversation.input.dock`（list / session / `InputZone`）、`connection.state` 与 `connection/reset`。
+- rc.2 → rc.3 订阅面几乎无变化：六个包仅 `package.json` 版本不同，另有 `dsh-api-session-controller/lib/typert.host.js` 的 `RemoteErrorDetailsMap` 新增一个错误码，仍是纯增量。
+- 产品代码零变化：`lib/index.js`、`lib/index.d.ts`、`lib/client.js` 与 npm 上 `0.1.20` 的 tarball 逐字节相同；回复库、发送链路与折叠偏好无需迁移。
+- 开发依赖对齐 settings `0.2.2-rc.3`；Cordis `4.1.0`、Schemastery `3.19.0`、include / group `1.1.0` 不变。
+- 验证覆盖 `pnpm run verify`（构建、类型检查、101 项测试、pack dry-run）；`dsh --profile web --dump-config` 在 `0.2.2-rc.3` 上退出码 0、stderr 零行，插件行在合成树中。GUI 返回 HTTP 401，未验证真实页面点击发送；未改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.2-rc.3` support (and checks `0.2.2-rc.2`). The rc.1 → rc.2 changes are additive contract and packaging work — minified client bundles with sourcemaps and `src/`, quote summaries, empty-prompt continuation, a hero frame slot, composer occurrences and history paging status — none of which touch the surfaces this plugin consumes. rc.2 → rc.3 differs only in package versions plus one added remote error code. Product artifacts are byte-identical to `0.1.20`; no data migration is needed.
+
+## 0.1.20 — 2026-11-04
+
+Verified DSH: `0.2.2-rc.1` (installed runtime and npm `next`). npm `latest` remains `0.2.1-rc.5`; `alpha` remains `0.2.2-alpha.3`.
+
+- 显式将 `0.2.2-rc.1` 加入 DSH engine、settings peer 与兼容矩阵，保留已有支持范围；严格 semver 与 DSH 门禁均通过，`0.3.0` 仍被拒绝。
+- 六个直接使用的官方包从 alpha.3 到 rc.1 仅 `package.json` 变化，运行代码、声明与文档逐字节相同；无需修改产品代码或迁移数据。
+- 开发依赖对齐 settings `0.2.2-rc.1`、Cordis `4.1.0`、Schemastery `3.19.0`、include / group `1.1.0`。既有 Cordis / Schemastery peer 范围已覆盖新版。
+- 同步中英文 README、双语 Release 及 npm manifest；修正 README 开发命令为先构建再测试，并增加一致性断言。
+- 验证覆盖类型、单元/UI 与构建产物；GUI 返回 HTTP 401，Client Inspect 未暴露输入槽位，未验证真实页面发送。不改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.2-rc.1` support and aligns development dependencies. The six consumed official packages differ from alpha.3 only in package metadata; product code and stored data are unchanged. Bilingual documentation and release checks are synchronized, including build-before-test README commands. Live browser sending remains unverified.
+
+## 0.1.19 — 2026-11-03
+
+Verified DSH: `0.2.2-alpha.3` (npm `alpha`, installed runtime) and `0.2.1-rc.5` (`latest` / `next`).
+
+- 显式同步 DSH engine、settings peer 与兼容矩阵，保留已有支持范围；产品代码无变化，无需迁移回复库或修改配置。
+- 对照六个直接使用的官方包：rc.4 → rc.5 仅包元数据变化；alpha.2 → alpha.3 保留本插件使用的 prompt、binding/scope、输入阶段、dock、configForms 和 settings 接口。
+- 开发依赖对齐 settings `0.2.2-alpha.3`、Cordis `4.0.6-alpha.2`、Schemastery `3.18.6-alpha.2`；显式补齐 include / group 开发期 peer 依赖，消除旧锁文件的 peer 不匹配。
+- CI、Release 和 verify 先构建再测试，防止干净环境跳过构建产物测试；新增 3 项发布版本、双语文档和流程一致性测试。
+- 同步中英文 README 与双语 Release；澄清当前 DSH 要求 Node.js 24.9.0+，不能仅按插件自身 Node.js 20 下限安装宿主。
+- 验证覆盖官方包接口、类型检查、单元/UI 测试和构建产物；GUI 返回 HTTP 401，Client Inspect 未暴露 dock，因此不宣称真实浏览器端到端通过。未修改 profile 或其他工作区插件。
+
+This compatibility patch updates metadata and development dependencies without changing product behavior. CI, Release and local verification build before testing, with three new release-consistency tests. Both READMEs and bilingual release notes are synchronized. Live browser interaction remains unverified; no profile or other workspace plugin was modified.
+
+## 0.1.18 — 2026-10-28
+
+Verified DeepSeek Harness: `0.2.2-alpha.2`（npm dist-tag `alpha`；`latest` 仍是 `0.2.1-rc.2`，`next` 是 `0.2.1-rc.4`），同时保持对 `0.2.1-rc.4`、`0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+**本版是自 `0.1.12` 以来第一次有产品代码变化：适配 DSH 0.2.2 新增的 `sending` 输入阶段。回复库、发送链路、折叠偏好均无需迁移。**
+
+- **新增 `sending` 输入阶段**：`InputState.phase` 从四态扩展为 `'plain' | 'adjudicating' | 'claimed' | 'submitting' | 'sending'`（`contract/input.d.ts`；普通消息正在等待 Host 接收时，编辑器与附件只读）。`0.1.17` 的 `inputPhaseOf` 只认识四个旧取值，会把 `sending` 归入「阶段不可观测」而**放行**发送；本版把 `sending` 纳入 `InputPhase` 与阶段映射，命中时按 `input-busy` 拒绝，与其余忙碌阶段一致。`tests/client-logic/send.spec.ts` 增加 `input-sending` 用例。
+- **门禁放行，但此前仍只靠宽松规则**：用 DSH 自带的 `evaluatePluginCompatibility` 实测，`0.1.17` 的 manifest 对 `0.2.2-alpha.2` 是 ADMITTED，靠的是尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease` 下接纳预发布；换成 node-semver 默认规则则是 **false**。把 `0.2.2-alpha.2` 显式加入 `dsh.engines.dsh` 与 peer `@deepseek-ai/dsh-settings` 两处范围后，它在两种规则下**都**接纳（实测 strict 也变 true）。`0.3.0` 仍在大门外（实测 REJECTED）。
+- **rc.4 → alpha.2 逐包核对，本插件消费的接口全部完好**（六个直接消费的官方包）：
+  - `dsh-client-ui-settings`：只有 `package.json` 与新增的六个 locale 文件不同，库代码与类型声明逐字节相同 → `ctx.configForms.get(entryId)` 未动。
+  - `dsh-settings`：库代码只有一行差异，`plainConfig(entry.fiber.config)` → `plainConfig(entry.fiber.effectiveConfig)`（Cordis 新增 `effectiveConfig` getter 的配套改动）；`settings.configure(presentation, owner)`、`describe`、`mutate` 的签名与语义未动。
+  - `dsh-api-remotes`：前向事件表新增 `llm/models-updated`、`plugin-manager/update-state` 两条；`settings/document-updated` 仍在（`mode: "emit"`，宿主 `lib/index.js` 中也在），客户端类型只增不减。
+  - `dsh-client-connection`：`lib/types/client/index.d.ts` 只新增可选的 `resolveAsset?(reference)`（worker 隧道的资源解析，served web app 里不存在）→ `connection.state`、`connection/reset` 未动。
+  - `dsh-api-session-controller`：变化较多（新增 `types/history/`、投影摘要类型、prompt echo 的 `onAccept` 与「Host 接收后才发布 echo」的文档），但 `sessions.binding(id)`、`sessions.scope(id)`、`SessionBinding`、`prompt(content, mode, signal?, requestId?)` 的签名逐字未变；本插件读取的 `SessionSnapshot` 字段 `running`/`blank`/`openState`/`openError`/`removed`/`subagent` 全部仍在。
+  - `dsh-client-ui-conversation`：变化最多（quote/text-interaction、`insertQuote`、`DraftQuote`、`sending` 阶段），但本插件注册的 `conversation.input.dock`（`kind: 'list'`、`scope: 'session'`、`owner: InputZone`）、`InputZone { session, input }`、`input.for(actx)` 与 `composer-blocks` 的 `storeFor(sessionId)` 逐字未动。`src/` 对 `insertQuote`、`DraftQuote`、`text-interaction` 的引用为 0 处。
+- **类型面钉到 `0.2.2-alpha.2`**：`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-rc.4` 改为 `0.2.2-alpha.2`；该运行时用 Cordis `4.0.6-alpha.1` 与 Schemastery `3.18.6-alpha.1`，故同时把两者的开发依赖钉到 `~4.0.6-alpha.1`、`~3.18.6-alpha.1`，peer 范围放宽为 `^4.0.4 || ~4.0.6-alpha.1`、`^3.18.4 || ~3.18.6-alpha.1`（Schemastery 两版只有 manifest 差异）。98 项测试全部通过。
+- **真实 profile 端到端**：`dsh --profile web --dump-config` 在 `0.2.2-alpha.2` 上退出码 0、**stderr 零行**，`dsh-quick-replies` 行在合成树里。
+- **文档同步**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.18`（中英文一致）；`docs/releases/v0.1.18.md` 按现行双语版式写。
+
+## 0.1.17 — 2026-10-27
+
+Verified DeepSeek Harness: `0.2.1-rc.4`（npm dist-tag `next`；`latest` 仍是 `0.2.1-rc.2`，`alpha` 停在 `0.2.1-alpha.5`），同时保持对 `0.2.1-rc.3`、`0.2.1-rc.2`、`0.2.1-alpha.5`、`0.2.1-alpha.4`、`0.2.1-alpha.3`、`0.2.1-alpha.1`、`0.2.0-rc.2`、`0.2.0-rc.1` 与整条 `0.1.7` 线的兼容声明。
+
+- **门禁放行，但此前只靠宽松规则**：用 DSH 自带的 `evaluatePluginCompatibility` 实测，`0.1.16` 的 manifest 对 `0.2.1-rc.4` 是 ADMITTED，靠的是尾段 `>=0.2.0 <0.3.0` 在门禁的 `includePrerelease` 下接纳排序高于 `0.2.0` 的预发布；换成 node-semver 默认规则则是 **false**。把 `0.2.1-rc.4` 显式加入 `dsh.engines.dsh` 与 peer `@deepseek-ai/dsh-settings` 两处范围后，它在两种规则下**都**接纳（实测 strict 也变 true）。`0.3.0` 仍在大门外（实测 REJECTED）。
+- **rc.3 → rc.4 逐包核对，本插件消费的接口全部完好。** 六个直接消费的官方包里，`dsh-settings`、`dsh-client-ui-settings`、`dsh-api-remotes`、`dsh-client-connection`、`dsh-api-session-controller` **五包只有 `package.json` 一个文件不同**，库代码与类型声明逐字节相同。`dsh-client-ui-conversation` 只改了两处：删掉 locale 键 `session.moreViewsCurrent`（`locales.d.ts` 与 `lib/client.js`），以及给 View 标签加了「文字溢出才出现」的 tooltip（`ViewTabLabel` / `labelNeedsTooltip`）。本插件注册的槽位契约与 `composer-blocks` 的 `storeFor`、`input.for(`、`InputState.phase` 四态、`ctx.settings.describe()`/`mutate`、`ctx.configForms.get(entryId)`、`connection.state` 全部未动；本插件也从不引用该 locale 键。
+- **真实 profile 端到端**：`dsh --profile web --dump-config` 在 `0.2.1-rc.4` 上退出码 0、**stderr 零行**，`dsh-quick-replies` 行在合成树里。
+- **类型面钉到 `0.2.1-rc.4`**：`devDependencies` 的 `@deepseek-ai/dsh-settings` 从 `0.2.1-rc.3` 改为 `0.2.1-rc.4`，类型检查直接针对 rc.4。98 项测试全部通过，`pnpm run verify` 全绿（含 pack dry-run 产出 `0.1.17`）。
+- **产品代码零变化**：`src/` 未改，构建出的 `lib/index.js`、`lib/client.js`、`lib/index.d.ts` 与 npm 上 `0.1.16` 的 tarball 逐字节相同——没有迁移数据、没有改配置。
+- **文档同步**：两份 README 的顶部支持声明、兼容段与兼容表各加一行 `0.1.17`（中英文一致）；`docs/releases/v0.1.17.md` 按现行双语版式写。
+
 ## 0.1.16 — 2026-10-23
 
 - Declare compatibility with DSH `0.2.1-rc.3` in the DSH engine range, settings peer range and compatibility matrix; pin the settings development dependency to the same release.
