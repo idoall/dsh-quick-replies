@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.22 — 2026-11-18
+
+Verified DSH: `0.2.2-rc.4` (installed runtime and npm `next`). npm `latest` is still `0.2.2-rc.1`; `alpha` remains `0.2.2-alpha.3`.
+
+- 显式将 `0.2.2-rc.4` 加入 DSH engine、settings peer 与兼容矩阵。此前 `0.1.21` 的 manifest 对 rc.4 只是**宽松接纳**：门禁靠尾段 `>=0.2.0 <0.3.0` 的 `includePrerelease` 放行，node-semver 默认规则是 **false**；显式加入后两种规则**都**接纳（`0.3.0` 实测仍 REJECTED）。
+- rc.3 → rc.4 唯一一条升级指南是 LLM 层变更：DeepSeek 流式内容拒答的错误码从 `MALFORMED_RESPONSE` 改为 `CONTENT_REFUSED`（落在 `@deepseek-ai/dsh-llm`）。本插件不消费 LLM 错误码，`src/` 里也没有 `@deepseek-ai/dsh-llm` 导入；插件自己的 `Refusal` 是 `src/client/send/faces.ts` 中定义的本地类型（`no-session`、`session-blank` 等），与拒答码无关。无需迁移。
+- 六个直接消费的官方包 rc.3 → rc.4 **逐文件比对只有 `package.json` 不同**：运行代码、类型声明、文档全部逐字节相同，且仅 `package.json` 内的版本号与相互依赖版本号变化。`dsh-client-ui-conversation` 的槽位契约、`dsh-settings` 的 `configure`、`configForms`、`remote.settings`、`sessions.binding/scope`、`prompt`、五态输入阶段、`composer-blocks.storeFor`、`connection.state` 全部未动。
+- 产品代码零变化：重新构建的 `lib/index.js`、`lib/index.d.ts`、`lib/client.js` 与 npm 上 `0.1.21` 的 tarball 逐字节相同；回复库、发送链路与折叠偏好无需迁移。
+- 开发依赖 settings 对齐 `0.2.2-rc.4`；Cordis `4.1.0`、Schemastery `3.19.0`、include / group `1.1.0` 不变。DSH 的 Node.js 下限仍是 **24.9.0+**。
+- 验证覆盖 `pnpm run verify`（构建、类型检查、101 项测试、pack dry-run）；`dsh --profile web --dump-config` 在 `0.2.2-rc.4` 上退出码 0、stderr 零行，插件行在合成树中。GUI 返回 HTTP 401，未验证真实页面点击发送；未改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.2-rc.4` support. On `0.1.21` that runtime was only loosely admitted — the gate let it through via the `>=0.2.0 <0.3.0` tail under `includePrerelease`, while strict node-semver said false; the explicit entry makes both rules accept it, and `0.3.0` stays rejected. The only rc.3 → rc.4 upgrade guide is an LLM change (DeepSeek content-refusal code `MALFORMED_RESPONSE` → `CONTENT_REFUSED`), which this plugin never consumes. The six directly consumed official packages differ only in `package.json`; product artifacts are byte-identical to `0.1.21` and no data migration is needed.
+
 ## 0.1.21 — 2026-11-14
 
 Verified DSH: `0.2.2-rc.3` (installed runtime and npm `next`, also `0.2.2-rc.2`). npm `latest` moved to `0.2.2-rc.1`; `alpha` remains `0.2.2-alpha.3`.
