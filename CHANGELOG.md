@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.23 — 2026-11-21
+
+Verified DSH: `0.2.2-rc.5` (installed runtime; npm now serves it on **both** `latest` and `next`). `alpha` remains `0.2.2-alpha.3`.
+
+- 显式将 `0.2.2-rc.5` 加入 DSH engine、settings peer 与兼容矩阵。与上一版同样的原因：`0.1.22` 对 rc.5 只是**宽松接纳**，门禁靠尾段 `>=0.2.0 <0.3.0` 的 `includePrerelease` 放行，node-semver 默认规则是 **false**；显式加入后两种规则**都**通过（`0.3.0` 实测仍 REJECTED）。
+- rc.4 → rc.5 唯一一条升级指南是组合层变更：交付的基础组合不再固定 `web.searchProvider`，改由 `dsh-web` 按模型提供方路由（DeepSeek 模型走旧版 Messages 搜索，其他走 DeepSeek Search API）。这与本插件无关：插件不读写 `web.searchProvider`、不发网页搜索请求、不产生 `web/deepseek-search-llm-request` 事件。本机 `web` profile 也显式设了 `searchProvider: ddg`，不受新默认值影响。
+- 六个直接消费的官方包 rc.4 → rc.5 实质上仍是版本更新：五个包只有 `package.json` 不同；`dsh-api-remotes` 另有 `lib/client.js` 与 `.map` 变化，但两版字节长度完全相同（1161099 字节），**差异只有 2 个字节**，位于内联 sourcemap 元数据（`"line":152` → `"line":174`），运行代码与类型声明未变。
+- 产品代码零变化：重新构建的 `lib/index.js`、`lib/index.d.ts`、`lib/client.js` 与 npm 上 `0.1.22` 的 tarball 逐字节相同；回复库、发送链路与折叠偏好无需迁移。
+- 开发依赖 settings 对齐 `0.2.2-rc.5`；Cordis `4.1.0`、Schemastery `3.19.0`、include / group `1.1.0` 不变。DSH 的 Node.js 下限仍是 **24.9.0+**。
+- 文档同步：npm 已把 `0.2.2-rc.5` 同时设为 `latest` 与 `next`，两份 README 的 dist-tag 标注随之改写（此前标记为 `latest` 的 `0.2.2-rc.1` 去掉了标注）。
+- 验证覆盖 `pnpm run verify`（构建、类型检查、101 项测试、pack dry-run）；`dsh --profile web --dump-config` 在 `0.2.2-rc.5` 上退出码 0、stderr 零行，插件行在合成树中。GUI 返回 HTTP 401，未验证真实页面点击发送；未改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.2-rc.5` support, which npm now serves on both `latest` and `next`. As with 0.1.22, the previous manifest admitted rc.5 only loosely — the gate passed it through the `>=0.2.0 <0.3.0` tail under prerelease matching while strict node-semver said false; the explicit entry makes both rules accept it and `0.3.0` stays rejected. The only rc.4 → rc.5 guide covers a composition-level `web.searchProvider` default, which this plugin never reads or produces. The six consumed packages are effectively version bumps: five differ only in `package.json`, and `dsh-api-remotes` differs by two bytes inside an inline sourcemap blob. Product artifacts are byte-identical to `0.1.22`; no data migration is needed.
+
 ## 0.1.22 — 2026-11-18
 
 Verified DSH: `0.2.2-rc.4` (installed runtime and npm `next`). npm `latest` is still `0.2.2-rc.1`; `alpha` remains `0.2.2-alpha.3`.
