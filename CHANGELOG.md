@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.24 — 2026-11-23
+
+Verified DSH: `0.2.3-alpha.2` (installed runtime; npm `alpha`). npm `latest` and `next` remain `0.2.2-rc.5`.
+
+- 显式将 `0.2.3-alpha.2` 加入 DSH engine、settings peer 与兼容矩阵；门禁与严格 semver 均接纳，`0.3.0` 仍被拒绝。这是跨小版本线的第一版：DSH 从 `0.2.2-rc.5` 直接升到 `0.2.3-alpha.2`。
+- **宿主 Node.js 下限提高**（rc.5 → alpha.1 的指南条目）：DSH 现在要求 **Node.js 24.x 系列中的 24.22.3+，或 26.13.1+**（不支持 Node 25）。本机已换成 Node v26.13.1。README 中英文的宿主要求已同步改写；插件自身 `engines.node` 仍是 `>=20`。
+- **框架依赖跨小版本**：DSH 的 `@deepseek-ai/dsh-settings` 现在 peer `cordis ~4.2.0-alpha.1`、`schemastery ~3.20.0-alpha.1`。开发依赖对齐 Cordis `4.2.0-alpha.1`、Schemastery `3.20.0-alpha.1`、include / group / loader `1.2.0-alpha.1`，并在 peer 范围中追加 `~4.2.0-alpha.1` 与 `~3.20.0-alpha.1`（保留旧的 `^4.0.4` / `~4.0.6-alpha.1` 与 `^3.18.4` / `~3.18.6-alpha.1`，旧 DSH 仍可用）。
+  - Cordis 4.2 的破坏性改动是 `ctx.root` 改为 `ctx[Context.root]`（symbol）、Service 的 intercept config 改名为 metadata（`Service.config` → `Service.metadata`、`resolveConfig` → `resolveIntercept`）。本插件没有使用其中任何一个；`ctx.inject`、`ctx.effect`、`ctx.get`、`ctx.on`、`ctx.fiber` 签名未变，类型检查在 4.2 下通过。
+  - Schemastery 3.20.0-alpha.1 与 3.19.0 只有 `package.json` 不同，`volatile()` 语义未变。
+- rc.5 → alpha.2 的其余 13 条指南均不适用：`ctx.sessionQuery.inspectSession` 移除（插件未用）、系统提示章节、压缩摘要、CUA、worktree 归档、list_agents 返回结构、office 技能合并、个性化推荐 bundle 退役、图片字节上限、PTC 默认 REPL、SDK prompt 时区、Action 卡片等，都与本插件的 settings / 槽位 / 发送链路无关。
+- 六个直接消费的官方包 rc.5 → alpha.2 变化较多（`dsh-api-session-controller` 62 项、`dsh-client-ui-conversation` 113 项、`dsh-client-connection` 大幅重构浏览器认证为可插拔 `ConnectionAuthentication`），但逐项核对插件消费面全部完好：`settings.configure`、`configForms.get`、`remote.settings` describe/mutate 与 `settings/document-updated`、`sessions.binding/scope`、`prompt` 的 queue/steer 与所用快照字段、五态输入阶段、`composer-blocks.storeFor`、`conversation.input.dock`（list / session / `InputZone`）、`input.for`、`connection.state` 与 `connection/reset` 均未变。`contract/session.d.ts` 仅改了一处 import 路径。
+- 产品代码零变化：`src/` 未改，构建出的 `lib/index.js`、`lib/index.d.ts`、`lib/client.js` 与 npm 上 `0.1.23` 的 tarball 逐字节相同；回复库、发送链路与折叠偏好无需迁移。
+- 验证覆盖 `pnpm run verify`（构建、类型检查、101 项测试、pack dry-run）；`dsh --profile web --dump-config` 在 `0.2.3-alpha.2` 上退出码 0、stderr 零行，插件行在合成树中。GUI 返回 HTTP 401，未验证真实页面点击发送；未改 profile 或其他工作区插件。
+
+This release declares DSH `0.2.3-alpha.2` support — the first release on the 0.2.3 line, jumped straight from `0.2.2-rc.5`. The host's Node.js floor moved to **24.22.3+ in the 24.x line, or 26.13.1+** (Node 25 is unsupported), and DSH now pegs Cordis `~4.2.0-alpha.1` and Schemastery `~3.20.0-alpha.1`; the development dependencies were aligned and both peer ranges extended while keeping the old ones. Cordis 4.2's breaking changes (`ctx.root` became a symbol, Service intercept config became metadata) are not used here, and `ctx.inject`/`ctx.effect`/`ctx.get`/`ctx.on`/`ctx.fiber` keep their signatures — typecheck passes. Schemastery only changed its manifest, so `volatile()` is untouched. The six consumed packages changed a lot in this window (session-controller 62 files, conversation 113, connection reworked browser auth into a pluggable `ConnectionAuthentication`), but every consumed interface is intact. Product artifacts are byte-identical to `0.1.23`; no data migration is needed.
+
 ## 0.1.23 — 2026-11-21
 
 Verified DSH: `0.2.2-rc.5` (installed runtime; npm now serves it on **both** `latest` and `next`). `alpha` remains `0.2.2-alpha.3`.
