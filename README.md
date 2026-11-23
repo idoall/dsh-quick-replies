@@ -20,7 +20,7 @@
 
 > A DeepSeek Harness community plugin. It mounts above the session composer and never modifies DSH source.
 >
-> **Supports DSH `0.2.2-rc.5` (latest and next).** Compatibility checked against this release; also supports `0.2.2-rc.4`, `0.2.2-rc.3`, `0.2.2-rc.2`, `0.2.2-rc.1`, `0.2.2-alpha.3` (alpha), `0.2.1-rc.5`, `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.23`.
+> **Supports DSH `0.2.3-alpha.2` (alpha).** Compatibility checked against this release; also supports `0.2.2-rc.5` (latest and next), `0.2.2-rc.4`, `0.2.2-rc.3`, `0.2.2-rc.2`, `0.2.2-rc.1`, `0.2.2-alpha.3`, `0.2.1-rc.5`, `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line — plugin `0.1.24`.
 
 A row of stored text chips sits above the input. Tapping one sends it as an ordinary user message: queued while the session is idle, steered at the next safe boundary while it runs. The plugin never rewrites your draft, never cancels anything, and never stops work.
 
@@ -41,7 +41,7 @@ The reply library is one Host settings entry (`dsh-quick-replies`), so every bro
 
 ## Install
 
-You need DeepSeek Harness with a Web profile. The plugin requires Node.js 20 or newer, but DSH `0.2.2-rc.5` itself requires **Node.js 24.9.0 or newer**; follow the stricter host requirement.
+You need DeepSeek Harness with a Web profile. The plugin requires Node.js 20 or newer, but DSH `0.2.3-alpha.2` itself requires **Node.js 24.22.3 or newer in the 24.x line, or 26.13.1 or newer** (Node 25 is not supported); follow the stricter host requirement.
 
 ```sh
 dsh plugin --profile web add dsh-quick-replies@latest
@@ -98,7 +98,7 @@ window.__DSH_TRANSPORT__ = { fetch: (input, init) => window.fetch(input, init), 
 
 ## Compatibility
 
-Current release `0.1.23` has been compatibility-checked against DSH `0.2.2-rc.5`, and retains support for `0.2.2-rc.4`, `0.2.2-rc.3`, `0.2.2-rc.2`, `0.2.2-rc.1`, `0.2.2-alpha.3`, `0.2.1-rc.5`, `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
+Current release `0.1.24` has been compatibility-checked against DSH `0.2.3-alpha.2`, and retains support for `0.2.2-rc.5`, `0.2.2-rc.4`, `0.2.2-rc.3`, `0.2.2-rc.2`, `0.2.2-rc.1`, `0.2.2-alpha.3`, `0.2.1-rc.5`, `0.2.2-alpha.2`, `0.2.1-rc.4`, `0.2.1-rc.3`, `0.2.1-rc.2`, `0.2.1-alpha.5`, `0.2.1-alpha.4`, `0.2.1-alpha.3`, `0.2.1-alpha.1`, `0.2.0-rc.2`, `0.2.0-rc.1` and the `0.1.7` line (`0.1.7-rc.2`, `0.1.7-rc.1`, `0.1.7-alpha.2`).
 
 | Plugin | DSH | Notes |
 | --- | --- | --- |
@@ -122,9 +122,10 @@ Current release `0.1.23` has been compatibility-checked against DSH `0.2.2-rc.5`
 | `0.1.20` | `0.2.2-rc.1` | Development dependencies aligned with Cordis 4.1 / Schemastery 3.19 |
 | `0.1.21` | `0.2.2-rc.3` | `0.2.2-rc.2` checked as well; settings development dependency at `0.2.2-rc.3` |
 | `0.1.22` | `0.2.2-rc.4` | settings development dependency at `0.2.2-rc.4` |
-| **`0.1.23`** | **`0.2.2-rc.5`** | Current release; npm moved this release to `latest` as well; settings development dependency at `0.2.2-rc.5` |
+| `0.1.23` | `0.2.2-rc.5` | settings development dependency at `0.2.2-rc.5` |
+| **`0.1.24`** | **`0.2.3-alpha.2`** | Current release; Cordis 4.2 / Schemastery 3.20 development dependencies; DSH's Node.js floor moved to 24.22.3+ / 26.13.1+ |
 
-The latest check covers official package contracts, typechecks, unit/UI tests and built artifacts; the composed Web profile also loads on `0.2.2-rc.5` (`dsh --profile web --dump-config`: exit 0, no stderr). Live browser interaction was not verified: the GUI returned HTTP 401 and Client Inspect did not expose the dock. No profile configuration or other workspace plugin was changed.
+The latest check covers official package contracts, typechecks, unit/UI tests and built artifacts; the composed Web profile also loads on `0.2.3-alpha.2` (`dsh --profile web --dump-config`: exit 0, no stderr). Live browser interaction was not verified: the GUI returned HTTP 401 and Client Inspect did not expose the dock. No profile configuration or other workspace plugin was changed.
 
 Upgrading from any earlier `0.1.x` needs no data migration and no config change. DSH releases newer than the ones listed are not declared compatible until they are tested; if the plugin is incompatible, disable or uninstall it rather than patching DSH core.
 
